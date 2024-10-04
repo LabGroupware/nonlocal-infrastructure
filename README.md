@@ -7,5 +7,6 @@
 ### Setup
 ``` sh
 asdf plugin add terraform
+asdf plugin add awscli
 asdf install
 ```

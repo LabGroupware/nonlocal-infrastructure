@@ -36,7 +36,7 @@ variable "aws_region" {
 }
 variable "aws_profile" {
   # type = string
-  default = "aws-demo"
+  default = "terraform"
   # description = "AWS CLI's profile"
 }
 provider "aws" {

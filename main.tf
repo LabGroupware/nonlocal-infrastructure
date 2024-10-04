@@ -1,14 +1,15 @@
-# "aws_instance"というタイプのresourceを定義し、 そのリソースに"web"というローカルネームをつける
-resource "aws_instance" "web" {  # <----- function create_ec2(name, type)のTerraformのSyntax
-
-  # aws_instance resourceのArguments
-  ami           = "ami-0992fc94ca0f1415a"
-  instance_type = "t2.micro"
+# variableブロックを使って、image_idという変数の名前を定義する
+variable "image_id" {
+  type = string # [string, number, bool]
+  description = "The id of the machine image (AMI) to use for the server." # 任意
+  default = "ami-abc123" # 任意のDefault値
+  # sensitive = true # 任意, これを設定すると、Terraform planやapplyコマンドのアウトプットに値が表示されなくなる
 }
 
-# local nameはユニークでなければいけない（"web"は再定義不可）
-resource "aws_instance" "app" { # <----- 同じfunction aws_instance()のAlias/local nameの"web"は上に定義されているので、使用不可。違う名前の"app"にする　
-  ami           = "ami-0992fc94ca0f1415a"
+# "aws_instance"というタイプのresourceを定義し、 そのリソースに"web"というローカルネームをつける
+resource "aws_instance" "web" {
+  # aws_instance resourceのArguments
+  ami           = var.image_id
   instance_type = "t2.micro"
 }
 

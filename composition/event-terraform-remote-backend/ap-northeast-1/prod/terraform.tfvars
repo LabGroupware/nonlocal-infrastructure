@@ -3,15 +3,14 @@
 ########################################
 region           = "ap-northeast-1"
 role_name        = "Admin"
-profile_name     = "aws-demo"
+profile_name     = "terraform"
 env              = "prod"
-application_name = "terraform-eks-demo-infra"
-app_name         = "terraform-eks-demo-infra"
+application_name = "lg-event"
+app_name         = "lg-event"
 
 ########################################
 ## Terraform State S3 Bucket
 ########################################
-acl                = "private"
 force_destroy      = false
 versioning_enabled = true
 
@@ -24,8 +23,10 @@ restrict_public_buckets = true
 ########################################
 ## DynamoDB
 ########################################
-read_capacity  = 5
-write_capacity = 5
+read_capacity  = 2
+write_capacity = 2
+billing_mode   = "PROVISIONED"
+table_class    = "STANDARD"
 hash_key       = "LockID"
 sse_enabled    = true # enable server side encryption
 attribute_name = "LockID"

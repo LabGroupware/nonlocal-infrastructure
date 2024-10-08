@@ -15,7 +15,7 @@ locals {
   ########################################
   ## Terraform State S3 Bucket
   ########################################
-  bucket_name = "s3-${local.region_tag[var.region]}-${lower(var.app_name)}-${var.env}-terraform-backend-${random_integer.digits.result}"
+  bucket_name = "s3-${local.region_tag[var.region]}-${lower(var.app_name)}-${var.env}-terraform-backend-${random_bytes.bytes.hex}"
   acl         = "private"
   tags = merge(var.tags, tomap({
     "Name" = local.bucket_name
@@ -35,7 +35,7 @@ locals {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm     = "aws:kms"
-        kms_master_key_id = module.s3_kms_key_terraform_backend.arn # use custom KMS key created in a separate module
+        kms_master_key_id = module.s3_kms_key_terraform_backend.key_arn # use custom KMS key created in a separate module
       }
     }
   }

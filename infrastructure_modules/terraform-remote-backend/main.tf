@@ -1,19 +1,16 @@
 # used to append random integer to S3 bucket to avoid conflicting bucket name across the globe
-resource "random_integer" "digits" {
-  min = 1
-  max = 100
+resource "random_bytes" "bytes" {
+  length = 4
 
   keepers = {
-    # Generate a new integer each time s3_bucket_name value gets updated
     listener_arn = var.app_name
   }
 }
 
-module "s3_bucket_terraform_remote_backend" {
+module "s3_bucket_terraform-remote-backend" {
   source = "../../resource_modules/storage/s3"
 
   bucket        = local.bucket_name
-  acl           = var.acl
   policy        = data.aws_iam_policy_document.bucket_policy.json
   tags          = local.tags
   force_destroy = var.force_destroy
@@ -40,22 +37,25 @@ module "s3_bucket_terraform_remote_backend" {
 module "dynamodb_terraform_state_lock" {
   source         = "../../resource_modules/database/dynamodb"
   name           = local.dynamodb_name
-  read_capacity  = var.read_capacity
-  write_capacity = var.write_capacity
+  billing_mode   = var.billing_mode
+  read_capacity  = var.billing_mode == "PROVISIONED" ? var.read_capacity : null
+  write_capacity = var.billing_mode == "PROVISIONED" ? var.write_capacity : null
+  table_class    = var.table_class
   hash_key       = var.hash_key
-  attribute_name = var.attribute_name
-  attribute_type = var.attribute_type
-  sse_enabled    = var.sse_enabled
-  tags           = var.tags
+  attributes = [{
+    name = var.attribute_name
+    type = var.attribute_type
+  }]
+  server_side_encryption_enabled = var.sse_enabled
+  tags                           = var.tags
 }
 
 ########################################
 ## KMS
 ########################################
 module "s3_kms_key_terraform_backend" {
-  source = "../../resource_modules/identity/kms_key"
+  source = "../../resource_modules/identity/kms"
 
-  name                    = local.ami_kms_key_name
   description             = local.ami_kms_key_description
   deletion_window_in_days = local.ami_kms_key_deletion_window_in_days
   tags                    = local.ami_kms_key_tags

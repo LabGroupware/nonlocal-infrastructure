@@ -2,8 +2,8 @@
 # AWS Terraform backend composition
 ########################################
 
-module "terraform_remote_backend" {
-  source   = "../../../../infrastructure_modules/terraform_remote_backend"
+module "terraform-remote-backend" {
+  source   = "../../../../infrastructure_modules/terraform-remote-backend"
   env      = var.env
   app_name = var.app_name
   region   = var.region
@@ -12,7 +12,6 @@ module "terraform_remote_backend" {
   ########################################
   ## Terraform State S3 Bucket
   ########################################
-  acl                = var.acl
   force_destroy      = var.force_destroy
   versioning_enabled = var.versioning_enabled
 
@@ -27,6 +26,8 @@ module "terraform_remote_backend" {
   ########################################
   read_capacity  = var.read_capacity
   write_capacity = var.write_capacity
+  billing_mode   = var.billing_mode
+  table_class    = var.table_class
   hash_key       = var.hash_key
   attribute_name = var.attribute_name
   attribute_type = var.attribute_type

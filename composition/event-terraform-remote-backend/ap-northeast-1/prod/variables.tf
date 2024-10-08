@@ -32,10 +32,6 @@ variable "app_name" {
 ########################################
 ## Terraform State S3 Bucket
 ########################################
-variable "acl" {
-  description = "The canned ACL to apply."
-  type        = string
-}
 
 variable "force_destroy" {
   description = "A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable."
@@ -78,6 +74,16 @@ variable "read_capacity" {
 
 variable "write_capacity" {
   description = "The number of write units for this table."
+  type        = string
+}
+
+variable "billing_mode" {
+  description = "Controls how you are billed for read/write throughput and how you manage capacity. The valid values are PROVISIONED or PAY_PER_REQUEST"
+  type        = string
+}
+
+variable "table_class" {
+  description = "The storage class of the table. Valid values are STANDARD and STANDARD_INFREQUENT_ACCESS"
   type        = string
 }
 

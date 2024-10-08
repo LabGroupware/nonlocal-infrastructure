@@ -1,8 +1,26 @@
 ########################################
-# Metadata
+# Variables
 ########################################
+
 variable "env" {
   description = "The name of the environment."
+  type        = string
+}
+
+variable "region" {
+  type = string
+}
+
+variable "role_name" {
+  type = string
+}
+
+variable "profile_name" {
+  type = string
+}
+
+variable "application_name" {
+  description = "The name of the application."
   type        = string
 }
 
@@ -11,23 +29,9 @@ variable "app_name" {
   type        = string
 }
 
-variable "region" {
-  description = "The AWS region this bucket should reside in."
-  type        = string
-}
-
-variable "tags" {
-  description = "A mapping of tags to assign to the resources."
-  type        = map(any)
-}
-
 ########################################
-## S3
+## Terraform State S3 Bucket
 ########################################
-variable "acl" {
-  description = "The canned ACL to apply."
-  type        = string
-}
 
 variable "force_destroy" {
   description = "A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable."
@@ -73,13 +77,22 @@ variable "write_capacity" {
   type        = string
 }
 
+variable "billing_mode" {
+  description = "Controls how you are billed for read/write throughput and how you manage capacity. The valid values are PROVISIONED or PAY_PER_REQUEST"
+  type        = string
+}
+
+variable "table_class" {
+  description = "The storage class of the table. Valid values are STANDARD and STANDARD_INFREQUENT_ACCESS"
+  type        = string
+}
+
 variable "hash_key" {
   description = "The attribute to use as the hash (partition) key."
   type        = string
 }
 
 variable "attribute_name" {}
-
 variable "attribute_type" {}
 
 variable "sse_enabled" {

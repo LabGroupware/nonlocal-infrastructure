@@ -14,5 +14,11 @@ terraform {
     }
   }
 
-  # backend "s3" {} # use local backend to first create S3 bucket to store .tfstate later
+  backend "s3" {
+    bucket  = "s3-apne1-lg-terraform-remote-backend-state-management"
+    region  = "ap-northeast-1"
+    key     = "lg-state-infra/ap-northeast-1/prod/terraform.tfstate"
+    dynamodb_table = "dynamo-apne1-lg-terraform-remote-backend-state-management-lock"
+    encrypt = true
+  }
 }

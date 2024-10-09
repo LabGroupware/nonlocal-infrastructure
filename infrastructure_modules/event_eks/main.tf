@@ -1,5 +1,5 @@
 module "key_pair" {
-  source = "../../resource_modules/compute/ec2_key_pair"
+  source = "../../resource_modules/compute/key-pair"
 
   key_name   = local.key_pair_name
   public_key = local.public_key
@@ -92,7 +92,7 @@ module "eks_cluster" {
 
 # IRSA ##
 module "cluster_autoscaler_iam_assumable_role" {
-  source = "../../resource_modules/identity/iam/iam-assumable-role-with-oidc"
+  source = "../../resource_modules/identity/iam/modules/iam-assumable-role-with-oidc"
 
   create_role                   = var.create_eks ? true : false
   role_name                     = local.cluster_autoscaler_iam_role_name
@@ -102,7 +102,7 @@ module "cluster_autoscaler_iam_assumable_role" {
 }
 
 module "cluster_autoscaler_iam_policy" {
-  source = "../../resource_modules/identity/iam/policy"
+  source = "../../resource_modules/identity/iam/modules/iam-policy"
 
   create_policy = var.create_eks ? true : false
   description   = local.cluster_autoscaler_iam_policy_description
@@ -113,7 +113,7 @@ module "cluster_autoscaler_iam_policy" {
 
 ## test_irsa_iam_assumable_role ##
 module "test_irsa_iam_assumable_role" {
-  source = "../../resource_modules/identity/iam/iam-assumable-role-with-oidc"
+  source = "../../resource_modules/identity/iam/modules/iam-assumable-role-with-oidc"
 
   create_role  = var.create_eks ? true : false
   role_name    = local.test_irsa_iam_role_name
@@ -126,7 +126,7 @@ module "test_irsa_iam_assumable_role" {
 
 # Ref: https://docs.aws.amazon.com/efs/latest/ug/network-access.html
 module "efs_security_group" {
-  source = "../../resource_modules/compute/security_group"
+  source = "../../resource_modules/compute/sg"
 
   name        = local.efs_security_group_name
   description = local.efs_security_group_description
@@ -146,20 +146,20 @@ module "efs_security_group" {
 module "efs" {
   source = "../../resource_modules/storage/efs"
 
-  ## EFS FILE SYSTEM ## 
+  ## EFS FILE SYSTEM ##
   encrypted = local.efs_encrypted
   tags      = local.efs_tags
 
-  ## EFS MOUNT TARGET ## 
+  ## EFS MOUNT TARGET ##
   mount_target_subnet_ids = var.efs_mount_target_subnet_ids
-  security_group_ids      = [module.efs_security_group.this_security_group_id]
+  security_group_ids      = [module.efs_security_group.security_group_id]
 }
 
 # ########################################
 # ## KMS for K8s secret's DEK (data encryption key) encryption
 # ########################################
 module "k8s_secret_kms_key" {
-  source = "../../resource_modules/identity/kms_key"
+  source = "../../resource_modules/identity/kms"
 
   name                    = local.k8s_secret_kms_key_name
   description             = local.k8s_secret_kms_key_description

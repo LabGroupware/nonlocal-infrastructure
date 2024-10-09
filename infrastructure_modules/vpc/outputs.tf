@@ -125,51 +125,51 @@ output "database_network_acl_id" {
 
 ## Public Security Group ##
 output "public_security_group_id" {
-  value = module.public_security_group.this_security_group_id
+  value = module.public_security_group.security_group_id
 }
 
 output "public_security_group_vpc_id" {
-  value = module.public_security_group.this_security_group_vpc_id
+  value = module.public_security_group.security_group_vpc_id
 }
 
 output "public_security_group_owner_id" {
-  value = module.public_security_group.this_security_group_owner_id
+  value = module.public_security_group.security_group_owner_id
 }
 
 output "public_security_group_name" {
-  value = module.public_security_group.this_security_group_name
+  value = module.public_security_group.security_group_name
 }
 
 ## Private Security Group ##
 output "private_security_group_id" {
-  value = module.private_security_group.this_security_group_id
+  value = module.private_security_group.security_group_id
 }
 
 output "private_security_group_vpc_id" {
-  value = module.private_security_group.this_security_group_vpc_id
+  value = module.private_security_group.security_group_vpc_id
 }
 
 output "private_security_group_owner_id" {
-  value = module.private_security_group.this_security_group_owner_id
+  value = module.private_security_group.security_group_owner_id
 }
 
 output "private_security_group_name" {
-  value = module.private_security_group.this_security_group_name
+  value = module.private_security_group.security_group_name
 }
 
 ## Database Security Group ##
 output "database_security_group_id" {
-  value = module.database_security_group.this_security_group_id
+  value = module.database_security_group.security_group_id
 }
 
 output "database_security_group_vpc_id" {
-  value = module.database_security_group.this_security_group_vpc_id
+  value = module.database_security_group.security_group_vpc_id
 }
 
 output "database_security_group_owner_id" {
-  value = module.database_security_group.this_security_group_owner_id
+  value = module.database_security_group.security_group_owner_id
 }
 
 output "database_security_group_name" {
-  value = module.database_security_group.this_security_group_name
+  value = module.database_security_group.security_group_name
 }

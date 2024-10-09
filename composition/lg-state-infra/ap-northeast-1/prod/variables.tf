@@ -11,10 +11,6 @@ variable "region" {
   type = string
 }
 
-variable "account_id" {
-  type = string
-}
-
 variable "role_name" {
   type = string
 }
@@ -93,8 +89,34 @@ variable "single_nat_gateway" {
   default     = true
 }
 
+variable "enable_flow_log" {
+  description = "Enable VPC flow logs"
+  default     = false
+}
+
+variable "create_flow_log_cloudwatch_log_group" {
+  description = "Create CloudWatch log group for VPC flow logs"
+  default     = false
+}
+
+variable "create_flow_log_cloudwatch_iam_role" {
+  description = "Create IAM role for VPC flow logs"
+  default     = false
+}
+
+variable "flow_log_max_aggregation_interval" {
+  description = "The maximum interval of time during which a flow is captured and aggregated into a flow log record"
+  type        = number
+  default     = null
+}
+
 ## Public Security Group ##
 variable "public_ingress_with_cidr_blocks" {
+  type = list(any)
+}
+
+# Bastion Security Group
+variable "public_bastion_ingress_with_cidr_blocks" {
   type = list(any)
 }
 
@@ -169,11 +191,6 @@ variable "aws_auth_users" {
   description = "List of user maps to add to the aws-auth configmap"
   type        = list(any)
   default     = []
-}
-
-variable "enable_irsa" {
-  description = "Whether to create OpenID Connect Provider for EKS to enable IRSA	"
-  default     = false
 }
 
 variable "enabled_cluster_log_types" {

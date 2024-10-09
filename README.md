@@ -85,9 +85,12 @@ terraform -chdir=composition/state-terraform-remote-backend/ap-northeast-1/prod/
 バケット名確認.
 ``` sh
 S3_LG_STATE_BUCKET=$(aws s3api list-buckets --query 'Buckets[?starts_with(Name, `s3-apne1-lg-state-prod-terraform-backend`)].Name | [0]' --output text)
-sed "s/{{S3_LG_STATE_BUCKET}}/$S3_LG_STATE_BUCKET/g" composition/lg-state-infra/ap-northeast-1/prod/backend.config.template > composition/lg-state-infra/ap-northeast-1/prod/backend.config
+sed "s/{{S3_LG_STATE_BUCKET}}/$S3_LG_STATE_BUCKET/g" composition/lg-state-infra/ap-northeast-1/prod/backend.tf.template > composition/lg-state-infra/ap-northeast-1/prod/backend.tf
 ```
-
+Init
+``` sh
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod init
+```
 ##### Event-SourcingのBackend作成
 State-Basedの`init`.
 ``` sh
@@ -101,11 +104,23 @@ terraform -chdir=composition/event-terraform-remote-backend/ap-northeast-1/prod/
 バケット名確認.
 ``` sh
 S3_LG_EVENT_BUCKET=$(aws s3api list-buckets --query 'Buckets[?starts_with(Name, `s3-apne1-lg-event-prod-terraform-backend`)].Name | [0]' --output text)
-sed "s/{{S3_LG_EVENT_BUCKET}}/$S3_LG_EVENT_BUCKET/g" composition/lg-event-infra/ap-northeast-1/prod/backend.config.template > composition/lg-event-infra/ap-northeast-1/prod/backend.config
+sed "s/{{S3_LG_EVENT_BUCKET}}/$S3_LG_EVENT_BUCKET/g" composition/lg-event-infra/ap-northeast-1/prod/backend.tf.template > composition/lg-event-infra/ap-northeast-1/prod/backend.tf
+```
+Init
+``` sh
+terraform -chdir=composition/lg-event-infra/ap-northeast-1/prod init
+```
+#### State研究の開始時
+terraform applyの実行
+``` sh
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod apply
 ```
 
-#### 研究の開始時
-#### 研究の終了時
+#### State研究の終了時
+terraform destroyの実行
+``` sh
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod destroy
+```
 
 #### Clean Up
 > クリーンアップ開始前に研究終了時の手順が完了していることを確認する.

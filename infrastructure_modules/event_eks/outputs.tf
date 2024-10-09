@@ -240,15 +240,15 @@ output "cluster_autoscaler_iam_policy" {
 # EFS MOUNT TARGET SG
 ########################################
 output "efs_mount_target_security_group_id" {
-  value = module.efs_security_group.this_security_group_id
+  value = module.efs_security_group.security_group_id
 }
 
 output "efs_mount_target_security_group_vpc_id" {
-  value = module.efs_security_group.this_security_group_vpc_id
+  value = module.efs_security_group.security_group_vpc_id
 }
 
 output "efs_mount_target_security_group_name" {
-  value = module.efs_security_group.this_security_group_name
+  value = module.efs_security_group.security_group_name
 }
 
 ########################################

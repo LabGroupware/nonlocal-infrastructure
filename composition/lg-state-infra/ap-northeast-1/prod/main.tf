@@ -7,6 +7,7 @@ module "vpc" {
   name                 = var.app_name
   cidr                 = var.cidr
   azs                  = var.azs
+  cluster_name         = local.cluster_name
   private_subnets      = var.private_subnets
   public_subnets       = var.public_subnets
   database_subnets     = var.database_subnets
@@ -14,9 +15,16 @@ module "vpc" {
   enable_dns_support   = var.enable_dns_support
   enable_nat_gateway   = var.enable_nat_gateway
   single_nat_gateway   = var.single_nat_gateway
+  enable_flow_log      = var.enable_flow_log
+  create_flow_log_cloudwatch_iam_role = var.create_flow_log_cloudwatch_iam_role
+  create_flow_log_cloudwatch_log_group = var.create_flow_log_cloudwatch_log_group
+  flow_log_max_aggregation_interval = var.flow_log_max_aggregation_interval
 
   ## Public Security Group ##
   public_ingress_with_cidr_blocks = var.public_ingress_with_cidr_blocks
+
+  ## Public Bastion Security Group ##
+  public_bastion_ingress_with_cidr_blocks = var.public_bastion_ingress_with_cidr_blocks
 
   ## Private Security Group ##
   # bastion EC2 not created yet
@@ -42,7 +50,7 @@ module "vpc" {
 # EKS
 ########################################
 module "eks" {
-  source = "../../../../infrastructure_modules/eks"
+  source = "../../../../infrastructure_modules/state_eks"
 
   ## EKS ##
   create_eks                     = var.create_eks
@@ -80,7 +88,7 @@ module "eks" {
   ## EFS SG ##
   vpc_cidr_block = module.vpc.vpc_cidr_block
 
-  ## EFS ## 
+  ## EFS ##
   efs_mount_target_subnet_ids = module.vpc.private_subnets
 
   ## Common tag metadata ##

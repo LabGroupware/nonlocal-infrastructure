@@ -6,6 +6,11 @@ variable "name" {
   default     = ""
 }
 
+variable "cluster_name" {
+  description = "Name of the EKS cluster"
+  default     = ""
+}
+
 variable "cidr" {
   description = "The CIDR block for the VPC. Default value is a valid CIDR, but not acceptable by AWS and should be overridden"
   default     = "0.0.0.0/0"
@@ -51,6 +56,27 @@ variable "single_nat_gateway" {
   default     = true
 }
 
+variable "enable_flow_log" {
+  description = "Enable VPC flow logs"
+  default     = false
+}
+
+variable "create_flow_log_cloudwatch_log_group" {
+  description = "Create CloudWatch log group for VPC flow logs"
+  default     = false
+}
+
+variable "create_flow_log_cloudwatch_iam_role" {
+  description = "Create IAM role for VPC flow logs"
+  default     = false
+}
+
+variable "flow_log_max_aggregation_interval" {
+  description = "The maximum interval of time during which a flow is captured and aggregated into a flow log record"
+  type        = number
+  default     = null
+}
+
 variable "tags" {
   description = "A map of tags to add to all resources"
   default     = {}
@@ -61,9 +87,10 @@ variable "public_ingress_with_cidr_blocks" {
   type = list(any)
 }
 
-## Private Security Group ##
-variable "bastion_sg_id" {
-  default = ""
+# Bastion Security Group
+variable "public_bastion_ingress_with_cidr_blocks" {
+  type = list(any)
+
 }
 
 ## Database security group ##
@@ -79,15 +106,12 @@ variable "databse_computed_ingress_with_eks_worker_source_security_group_ids" {
   }))
 }
 
-# variable "cluster_name" {}
-
-
 ## Metatada ##
 variable "env" {}
 variable "app_name" {}
 variable "region" {}
 
-## COMMON TAGS ## 
+## COMMON TAGS ##
 variable "region_tag" {
   type = map(string)
 

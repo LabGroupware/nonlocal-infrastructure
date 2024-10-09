@@ -1,0 +1,9 @@
+terraform {
+  backend "s3" {
+    bucket         = "{{S3_LG_STATE_BUCKET}}"
+    region         = "ap-northeast-1"
+    key            = "lg-state-infra/ap-northeast-1/prod/terraform.tfstate"
+    dynamodb_table = "dynamo-apne1-lg-state-prod-terraform-state-lock"
+    encrypt        = true
+  }
+}

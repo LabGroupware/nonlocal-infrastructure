@@ -2,12 +2,11 @@
 # Environment setting
 ########################################
 region           = "ap-northeast-1"
-account_id       = "266981300450"
 role_name        = "Admin"
-profile_name     = "aws-demo"
+profile_name     = "terraform"
 env              = "prod"
-application_name = "terraform-eks-demo-infra"
-app_name         = "terraform-eks-demo-infra"
+application_name = "lg-state-infra"
+app_name         = "lg-state-infra"
 
 ########################################
 # VPC
@@ -16,17 +15,24 @@ cidr                 = "10.1.0.0/16"
 azs                  = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
 public_subnets       = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"] # 256 IPs per subnet
 private_subnets      = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
-database_subnets     = ["10.1.105.0/24", "10.1.106.0/24", "10.1.107.0/24"]
+database_subnets     = ["10.1.111.0/24", "10.1.112.0/24", "10.1.113.0/24"]
 enable_dns_hostnames = "true"
 enable_dns_support   = "true"
-enable_nat_gateway   = "true" # need internet connection for worker nodes in private subnets to be able to join the cluster 
+enable_nat_gateway   = "true" # need internet connection for worker nodes in private subnets to be able to join the cluster
 single_nat_gateway   = "true"
+enable_flow_log      = "false"
+create_flow_log_cloudwatch_iam_role = "false"
+create_flow_log_cloudwatch_log_group = "false"
+flow_log_max_aggregation_interval = null
 
 
 ## Public Security Group ##
 public_ingress_with_cidr_blocks = []
 
-create_eks = true
+## Public Bastion Security Group ##
+public_bastion_ingress_with_cidr_blocks = []
+
+create_eks = false
 
 ########################################
 # EKS
@@ -46,8 +52,8 @@ aws_auth_users = []
 # WARNING: mixing managed and unmanaged node groups will render unmanaged nodes to be unable to connect to internet & join the cluster when restarting.
 # how many groups of K8s worker nodes you want? Specify at least one group of worker node
 # gotcha: managed node group doesn't support 1) propagating taint to K8s nodes and 2) custom userdata. Ref: https://eksctl.io/usage/eks-managed-nodes/#feature-parity-with-unmanaged-nodegroups
-node_groups = {
-}
+# node_groups = {
+# }
 
 # note (only for unmanaged node group)
 # gotcha: need to use kubelet_extra_args to propagate taints/labels to K8s node, because ASG tags not being propagated to k8s node objects.
@@ -61,7 +67,7 @@ self_managed_node_groups = {
     max_size      = 1
     min_size      = 1
     desired_size  = 1 # this will be ignored if cluster autoscaler is enabled: asg_desired_capacity: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/autoscaling.md#notes
-    
+
     # use KMS key to encrypt EKS worker node's root EBS volumes
     # ref: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/self_managed_node_group/main.tf#L204C11-L215
     block_device_mappings = {

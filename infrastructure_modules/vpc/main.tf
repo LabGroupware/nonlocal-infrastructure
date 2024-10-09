@@ -9,6 +9,12 @@ module "vpc" {
   public_subnets   = var.public_subnets
   database_subnets = var.database_subnets
 
+  create_database_subnet_group = true
+  create_database_subnet_route_table= true
+  # create_database_internet_gateway_route = true
+  # create_database_nat_gateway_route = true
+
+  # VPC DNS Parameters
   enable_dns_hostnames = var.enable_dns_hostnames
   enable_dns_support   = var.enable_dns_support
 
@@ -21,15 +27,15 @@ module "vpc" {
   database_subnet_tags = local.database_subnet_tags
 
   # VPC Flow Logs (Cloudwatch log group and IAM role will be created)
-  enable_flow_log                      = true
-  create_flow_log_cloudwatch_log_group = true
-  create_flow_log_cloudwatch_iam_role  = true
-  flow_log_max_aggregation_interval    = 60
+  enable_flow_log                      = var.enable_flow_log
+  create_flow_log_cloudwatch_log_group = var.create_flow_log_cloudwatch_log_group
+  create_flow_log_cloudwatch_iam_role  = var.create_flow_log_cloudwatch_iam_role
+  flow_log_max_aggregation_interval    = var.flow_log_max_aggregation_interval
 }
 
 # allow ingress for port 80 & 443 from anywhere (i.e. source CIDR 0.0.0.0/0)
 module "public_security_group" {
-  source = "../../resource_modules/compute/security_group"
+  source = "../../resource_modules/compute/sg"
 
   name        = local.public_security_group_name
   description = local.public_security_group_description
@@ -44,9 +50,25 @@ module "public_security_group" {
   tags         = local.public_security_group_tags
 }
 
+module "public_bastion_security_group" {
+  source = "../../resource_modules/compute/sg"
+
+  name        = local.public_bastion_security_group_name
+  description = local.public_bastion_security_group_description
+  vpc_id = module.vpc.vpc_id
+
+  ingress_rules = ["ssh-tcp"]
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+  ingress_with_cidr_blocks = var.public_bastion_ingress_with_cidr_blocks
+
+  # Egress Rule - all-all open
+  egress_rules = ["all-all"]
+  tags = local.public_bastion_security_group_tags
+}
+
 # allow ingress only from public SG for port 80, 443, and 22
 module "private_security_group" {
-  source = "../../resource_modules/compute/security_group"
+  source = "../../resource_modules/compute/sg"
 
   name        = local.private_security_group_name
   description = local.private_security_group_description
@@ -57,22 +79,22 @@ module "private_security_group" {
   computed_ingress_with_source_security_group_id = [
     {
       rule                     = "http-80-tcp"
-      source_security_group_id = module.public_security_group.this_security_group_id
+      source_security_group_id = module.public_security_group.security_group_id
       description              = "Port 80 from public SG rule"
     },
     {
       rule                     = "https-443-tcp"
-      source_security_group_id = module.public_security_group.this_security_group_id
+      source_security_group_id = module.public_security_group.security_group_id
       description              = "Port 443 from public SG rule"
     },
-    # bastion EC2 not created yet 
-    # {
-    #   rule                     = "ssh-tcp"
-    #   source_security_group_id = var.bastion_sg_id
-    #   description              = "SSH from bastion SG rule"
-    # },
+    # bastion EC2
+    {
+      rule                     = "ssh-tcp"
+      source_security_group_id = module.public_bastion_security_group.security_group_id
+      description              = "SSH from bastion SG rule"
+    }
   ]
-  number_of_computed_ingress_with_source_security_group_id = 2
+  number_of_computed_ingress_with_source_security_group_id = 3
 
   # allow ingress from within (i.e. connecting from EC2 to other EC2 associated with the same private SG)
   ingress_with_self = [
@@ -89,7 +111,7 @@ module "private_security_group" {
 
 # allow ingress from private SG for port 27017-19 for mongoDB and port 3306 for MySQL
 module "database_security_group" {
-  source = "../../resource_modules/compute/security_group"
+  source = "../../resource_modules/compute/sg"
 
   name        = local.db_security_group_name
   description = local.db_security_group_description
@@ -97,7 +119,7 @@ module "database_security_group" {
 
   # combine list of SG rules from EKS worker SG and private SG
   computed_ingress_with_source_security_group_id           = concat(local.db_security_group_computed_ingress_with_source_security_group_id, var.databse_computed_ingress_with_eks_worker_source_security_group_ids)
-  number_of_computed_ingress_with_source_security_group_id = var.create_eks ? 7 : 4
+  number_of_computed_ingress_with_source_security_group_id = var.create_eks ? 0 : 0
 
   # Open for self (rule or from_port+to_port+protocol+description)
   ingress_with_self = [
@@ -111,3 +133,4 @@ module "database_security_group" {
   egress_rules = ["all-all"]
   tags         = local.db_security_group_tags
 }
+

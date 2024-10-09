@@ -11,19 +11,19 @@ app_name         = "lg-state-infra"
 ########################################
 # VPC
 ########################################
-cidr                 = "10.1.0.0/16"
-azs                  = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
-public_subnets       = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"] # 256 IPs per subnet
-private_subnets      = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
-database_subnets     = ["10.1.111.0/24", "10.1.112.0/24", "10.1.113.0/24"]
-enable_dns_hostnames = "true"
-enable_dns_support   = "true"
-enable_nat_gateway   = "true" # need internet connection for worker nodes in private subnets to be able to join the cluster
-single_nat_gateway   = "true"
-enable_flow_log      = "false"
-create_flow_log_cloudwatch_iam_role = "false"
+cidr                                 = "10.1.0.0/16"
+azs                                  = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
+public_subnets                       = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"] # 256 IPs per subnet
+private_subnets                      = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
+database_subnets                     = ["10.1.111.0/24", "10.1.112.0/24", "10.1.113.0/24"]
+enable_dns_hostnames                 = "true"
+enable_dns_support                   = "true"
+enable_nat_gateway                   = "true" # need internet connection for worker nodes in private subnets to be able to join the cluster
+single_nat_gateway                   = "true"
+enable_flow_log                      = "false"
+create_flow_log_cloudwatch_iam_role  = "false"
 create_flow_log_cloudwatch_log_group = "false"
-flow_log_max_aggregation_interval = null
+flow_log_max_aggregation_interval    = null
 
 
 ## Public Security Group ##
@@ -33,6 +33,12 @@ public_ingress_with_cidr_blocks = []
 public_bastion_ingress_with_cidr_blocks = []
 
 create_eks = false
+
+########################################
+# Bastion
+########################################
+bastion_instance_type       = "t3.micro"
+bastion_instance_monitoring = false
 
 ########################################
 # EKS

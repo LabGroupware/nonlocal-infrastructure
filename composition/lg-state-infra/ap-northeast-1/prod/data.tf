@@ -36,6 +36,22 @@ locals {
     # }
   ] : []
 
+  ########################################
+  # Bastion
+  ########################################
+  bastion_instance_name = "bastion-host-${var.region_tag[var.region]}-${var.env}-${var.app_name}"
+  bastion_tags = merge(
+    local.tags,
+    tomap({
+      "Instance-Name" = local.bastion_instance_name
+    })
+  )
+  bastion_eip_tags = merge(
+    local.tags,
+    tomap({
+      "Instance-Name" = local.bastion_instance_name
+    })
+  )
 
   ########################################
   # EKS
@@ -72,4 +88,30 @@ locals {
       groups   = ["system:masters"]
     },
   ]) : var.aws_auth_roles
+}
+
+data "external" "hostname" {
+  program = ["bash", "-c", <<EOT
+    hostname=$(hostname)
+    echo "{\"hostname\": \"$hostname\"}"
+  EOT
+  ]
+}
+
+data "aws_key_pair" "bastion_key_pair" {
+
+  filter {
+    name   = "tag:Application"
+    values = [var.app_name]
+  }
+
+  filter {
+    name   = "tag:Environment"
+    values = [var.env]
+  }
+
+  filter {
+    name   = "tag:Hostname"
+    values = [data.external.hostname.result["hostname"]]
+  }
 }

@@ -177,6 +177,18 @@ output "database_security_group_name" {
   value = module.vpc.database_security_group_name
 }
 
+########################################
+# Bastion
+########################################
+output "bastion_instance_public_instance_id" {
+  description = "Public EC2 Instance ID"
+  value       = module.bastion.bastion_instance_public_instance_id
+}
+
+output "bastion_instance_eip" {
+  description = "Elastic IP associated to the Bastion Host"
+  value       = module.bastion.bastion_instance_eip
+}
 
 # ########################################
 # # EKS

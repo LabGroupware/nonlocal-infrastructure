@@ -140,6 +140,23 @@ output "public_security_group_name" {
   value = module.public_security_group.security_group_name
 }
 
+## Public Bastion Security Group ##
+output "public_bastion_security_group_id" {
+  value = module.public_bastion_security_group.security_group_id
+}
+
+output "public_bastion_security_group_vpc_id" {
+  value = module.public_bastion_security_group.security_group_vpc_id
+}
+
+output "public_bastion_security_group_owner_id" {
+  value = module.public_bastion_security_group.security_group_owner_id
+}
+
+output "public_bastion_security_group_name" {
+  value = module.public_bastion_security_group.security_group_name
+}
+
 ## Private Security Group ##
 output "private_security_group_id" {
   value = module.private_security_group.security_group_id

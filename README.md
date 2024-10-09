@@ -35,6 +35,25 @@ export AWS_DEFAULT_PROFILE=terraform
 ```
 
 ### Life Cycle
+
+#### KeyPairの生成
+> EC2はAWSの機能によるKey Pairを一つまでとしている.
+> 今回は毎回研究用環境を立ち上げたり, クリーンアップを繰り返すため, 全ユーザーが`apply`する可能性を考え, 全員がこの作業を行うこととする.
+> なお, 本番運用では通常, 管理者が`pem(private key)`を所持し, さらにアクセスが必要なユーザーに関しては管理者へ公開鍵を送信後, 管理者がその公開鍵をEC2上に`scp`するなどマニュアルで行う.
+``` sh
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod/key-pair init
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod/key-pair apply
+
+terraform -chdir=composition/lg-event-infra/ap-northeast-1/prod/key-pair init
+terraform -chdir=composition/lg-event-infra/ap-northeast-1/prod/key-pair apply
+```
+#### KeyPairの削除
+> KeyPairの削除に関しては, それぞれがstateを保持しているため, 任意ホストの`destroy`で削除されるわけではなく, これを生成を行った個人が責任を持って行うこととする.
+``` sh
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod/key-pair destroy
+terraform -chdir=composition/lg-event-infra/ap-northeast-1/prod/key-pair destroy
+```
+
 #### Set Up
 ##### BackendState管理のBackend作成
 backend-stateを管理するterraformファイルをstate管理するストレージの作成.
@@ -110,17 +129,6 @@ Init
 ``` sh
 terraform -chdir=composition/lg-event-infra/ap-northeast-1/prod init
 ```
-#### State研究の開始時
-terraform applyの実行
-``` sh
-terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod apply
-```
-
-#### State研究の終了時
-terraform destroyの実行
-``` sh
-terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod destroy
-```
 
 #### Clean Up
 > クリーンアップ開始前に研究終了時の手順が完了していることを確認する.
@@ -180,4 +188,16 @@ S3_LG_STATE_MANAGE_BUCKET="s3-apne1-lg-terraform-remote-backend-state-management
 ./delete_s3_object_versions.sh $S3_LG_STATE_MANAGE_BUCKET lg-event-infra/ap-northeast-1/prod/terraform.tfstate
 
 aws s3api delete-bucket --bucket $S3_LG_STATE_MANAGE_BUCKET --region ap-northeast-1
+```
+
+#### State研究の開始時
+terraform applyの実行
+``` sh
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod apply
+```
+
+#### State研究の終了時
+terraform destroyの実行
+``` sh
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod destroy
 ```

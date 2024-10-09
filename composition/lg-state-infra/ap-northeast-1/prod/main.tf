@@ -4,21 +4,21 @@
 module "vpc" {
   source = "../../../../infrastructure_modules/vpc" # using infra module VPC which acts like a facade to many sub-resources
 
-  name                 = var.app_name
-  cidr                 = var.cidr
-  azs                  = var.azs
-  cluster_name         = local.cluster_name
-  private_subnets      = var.private_subnets
-  public_subnets       = var.public_subnets
-  database_subnets     = var.database_subnets
-  enable_dns_hostnames = var.enable_dns_hostnames
-  enable_dns_support   = var.enable_dns_support
-  enable_nat_gateway   = var.enable_nat_gateway
-  single_nat_gateway   = var.single_nat_gateway
-  enable_flow_log      = var.enable_flow_log
-  create_flow_log_cloudwatch_iam_role = var.create_flow_log_cloudwatch_iam_role
+  name                                 = var.app_name
+  cidr                                 = var.cidr
+  azs                                  = var.azs
+  cluster_name                         = local.cluster_name
+  private_subnets                      = var.private_subnets
+  public_subnets                       = var.public_subnets
+  database_subnets                     = var.database_subnets
+  enable_dns_hostnames                 = var.enable_dns_hostnames
+  enable_dns_support                   = var.enable_dns_support
+  enable_nat_gateway                   = var.enable_nat_gateway
+  single_nat_gateway                   = var.single_nat_gateway
+  enable_flow_log                      = var.enable_flow_log
+  create_flow_log_cloudwatch_iam_role  = var.create_flow_log_cloudwatch_iam_role
   create_flow_log_cloudwatch_log_group = var.create_flow_log_cloudwatch_log_group
-  flow_log_max_aggregation_interval = var.flow_log_max_aggregation_interval
+  flow_log_max_aggregation_interval    = var.flow_log_max_aggregation_interval
 
   ## Public Security Group ##
   public_ingress_with_cidr_blocks = var.public_ingress_with_cidr_blocks
@@ -47,10 +47,26 @@ module "vpc" {
 }
 
 ########################################
+# Bastion
+########################################
+module "bastion" {
+  source = "../../../../infrastructure_modules/bastion"
+
+  instance_name       = local.bastion_instance_name
+  instance_type       = var.bastion_instance_type
+  instance_keypair    = data.aws_key_pair.bastion_key_pair.key_name
+  instance_monitoring = var.bastion_instance_monitoring
+  bastion_subnet_id   = module.vpc.public_subnets[0]
+  bastion_sg_ids      = [module.vpc.public_bastion_security_group_id]
+  bastion_tags        = local.bastion_tags
+  bastion_eip_tags    = local.bastion_eip_tags
+}
+
+########################################
 # EKS
 ########################################
 module "eks" {
-  source = "../../../../infrastructure_modules/state_eks"
+  source = "../../../../infrastructure_modules/eks-state"
 
   ## EKS ##
   create_eks                     = var.create_eks

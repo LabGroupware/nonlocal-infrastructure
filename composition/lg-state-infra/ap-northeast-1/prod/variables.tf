@@ -134,6 +134,19 @@ variable "databse_computed_ingress_with_eks_worker_source_security_group_ids" {
   default = []
 }
 
+########################################
+# Bastion
+########################################
+variable "bastion_instance_type" {
+  description = "EC2 Instance Type"
+  type        = string
+}
+
+variable "bastion_instance_monitoring" {
+  description = "Enable Monitoring for EC2 Instance"
+  type        = bool
+}
+
 
 ########################################
 # EKS

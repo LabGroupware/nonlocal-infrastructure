@@ -41,3 +41,10 @@ operations/variable-scripts/variable.json
 
 # Sentinel runtime directory
 .sentinel
+
+.keys
+# SSH public key
+*.id_rsa.pub
+
+# SSH private key
+*.id_rsa

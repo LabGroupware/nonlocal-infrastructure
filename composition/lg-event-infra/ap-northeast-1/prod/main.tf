@@ -18,6 +18,9 @@ module "vpc" {
   ## Public Security Group ##
   public_ingress_with_cidr_blocks = var.public_ingress_with_cidr_blocks
 
+  ## Public Bastion Security Group ##
+  public_bastion_ingress_with_cidr_blocks = var.public_bastion_ingress_with_cidr_blocks
+
   ## Private Security Group ##
   # bastion EC2 not created yet
   # bastion_sg_id  = module.bastion.security_group_id
@@ -80,7 +83,7 @@ module "eks" {
   ## EFS SG ##
   vpc_cidr_block = module.vpc.vpc_cidr_block
 
-  ## EFS ## 
+  ## EFS ##
   efs_mount_target_subnet_ids = module.vpc.private_subnets
 
   ## Common tag metadata ##

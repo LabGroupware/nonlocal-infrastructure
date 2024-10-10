@@ -1,6 +1,7 @@
 locals {
   key_values = concat(
-    var.need_bastion_key ? ["bastion"] : []
+    var.need_bastion_key ? ["bastion"] : [],
+    var.need_eks_node_key ? ["eks-node"] : [],
   )
 
   key_names = {
@@ -13,6 +14,7 @@ locals {
       Application = var.application_name
       Environment = var.env
       Hostname    = data.external.hostname.result["hostname"]
+      Keyname     = key
     }
   }
 }

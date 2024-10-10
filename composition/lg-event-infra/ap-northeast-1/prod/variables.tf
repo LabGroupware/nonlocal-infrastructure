@@ -98,6 +98,11 @@ variable "public_ingress_with_cidr_blocks" {
   type = list(any)
 }
 
+## Public Bastion Security Group ##
+variable "public_bastion_ingress_with_cidr_blocks" {
+  type = list(any)
+}
+
 ## Database security group ##
 variable "create_eks" {}
 variable "databse_computed_ingress_with_db_controller_source_security_group_id" {

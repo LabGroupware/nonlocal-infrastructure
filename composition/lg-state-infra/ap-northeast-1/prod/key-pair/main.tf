@@ -7,5 +7,6 @@ module "keys" {
 
   private_dir      = "${path.module}/../.keys"
   need_bastion_key = var.need_bastion_key
+  need_eks_node_key = var.need_eks_node_key
 }
 

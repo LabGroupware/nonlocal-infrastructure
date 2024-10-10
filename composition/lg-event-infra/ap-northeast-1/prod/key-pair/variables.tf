@@ -22,3 +22,8 @@ variable "need_bastion_key" {
   description = "Whether to create a bastion host or not"
   type        = bool
 }
+
+variable "need_eks_node_key" {
+  description = "Whether to create a key pair for EKS nodes or not"
+  type        = bool
+}

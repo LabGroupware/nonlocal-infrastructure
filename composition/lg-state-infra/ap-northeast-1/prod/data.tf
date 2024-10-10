@@ -99,7 +99,6 @@ data "external" "hostname" {
 }
 
 data "aws_key_pair" "bastion_key_pair" {
-
   filter {
     name   = "tag:Application"
     values = [var.app_name]
@@ -113,5 +112,32 @@ data "aws_key_pair" "bastion_key_pair" {
   filter {
     name   = "tag:Hostname"
     values = [data.external.hostname.result["hostname"]]
+  }
+
+  filter {
+    name   = "tag:Keyname"
+    values = ["bastion"]
+  }
+}
+
+data "aws_key_pair" "eks_node_key_pair" {
+  filter {
+    name   = "tag:Application"
+    values = [var.app_name]
+  }
+
+  filter {
+    name   = "tag:Environment"
+    values = [var.env]
+  }
+
+  filter {
+    name   = "tag:Hostname"
+    values = [data.external.hostname.result["hostname"]]
+  }
+
+  filter {
+    name   = "tag:Keyname"
+    values = ["eks-node"]
   }
 }

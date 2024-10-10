@@ -43,7 +43,7 @@ bastion_instance_monitoring = false
 ########################################
 # EKS
 ########################################
-cluster_version                = 1.27
+cluster_version                = 1.30
 cluster_endpoint_public_access = true # need this otherwise can't access EKS from outside VPC. Ref: https://github.com/terraform-aws-modules/terraform-aws-eks#input_cluster_endpoint_public_access
 
 # if set to true, AWS IAM Authenticator will use IAM role specified in "role_name" to authenticate to a cluster

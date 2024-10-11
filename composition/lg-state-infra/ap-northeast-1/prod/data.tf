@@ -56,38 +56,11 @@ locals {
   ########################################
   # EKS
   ########################################
-  ## EKS ##
-  vpc_id          = module.vpc.vpc_id
-  private_subnets = module.vpc.private_subnets
-  cluster_name    = "eks-${var.region_tag[var.region]}-${var.env}-${var.app_name}"
 
   eks_tags = {
     Environment = var.env
     Application = var.app_name
   }
-
-  # specify AWS Profile if you want kubectl to use a named profile to authenticate instead of access key and secret access key
-  kubeconfig_aws_authenticator_env_variables = var.authenticate_using_aws_profile == true ? {
-    AWS_PROFILE = var.profile_name
-  } : {}
-
-  aws_auth_roles = var.authenticate_using_role == true ? concat(var.aws_auth_roles, [
-    {
-      rolearn  = "arn:aws:iam::${data.aws_caller_identity.this.account_id}:role/${var.role_name}"
-      username = "k8s_terraform_builder"
-      groups   = ["system:masters"]
-    },
-    {
-      rolearn  = "arn:aws:iam::${data.aws_caller_identity.this.account_id}:role/Developer"
-      username = "k8s-developer"
-      groups   = ["k8s-developer"]
-    },
-    {
-      rolearn  = "arn:aws:iam::${data.aws_caller_identity.this.account_id}:role/FullAdmin"
-      username = "k8s_admin"
-      groups   = ["system:masters"]
-    },
-  ]) : var.aws_auth_roles
 }
 
 data "external" "hostname" {

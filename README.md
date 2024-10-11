@@ -9,7 +9,14 @@
 ``` sh
 asdf plugin add terraform
 asdf plugin add awscli
+asdf plugin add kubectl
 asdf install
+```
+#### Kubectlの補完
+> すでに行っている場合は不要
+``` sh
+echo "source <(kubectl completion bash)" >> ~/.bashrc
+source ~/.bashrc
 ```
 #### IAMユーザー作成
 AWS上にAdministratorAccessを持つユーザーを作成後, アクセスキーを取得する.
@@ -194,6 +201,10 @@ aws s3api delete-bucket --bucket $S3_LG_STATE_MANAGE_BUCKET --region ap-northeas
 terraform applyの実行
 ``` sh
 terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod apply
+```
+
+``` sh
+aws eks update-kubeconfig --region ap-northeast-1 --name EKSLGStateApNortheast1ProdCluster
 ```
 
 #### State研究の終了時

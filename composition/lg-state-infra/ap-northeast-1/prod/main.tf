@@ -1,3 +1,13 @@
+# TODO: NodeのLabel, Taintの設定修正
+# TODO: Block Device Mountの確認
+# TODO: Access Entryの作成
+# TODO: EBS, EFSのPersistent Volumeの設定を追記する
+# TODO: IRSAの設定を追記する
+# TODO: BasionからEKS Nodeへのアクセスを許可するための設定を追記する
+# (security group + instance profile(iam role))
+# TODO: PrometheusとGrafanaの設定を追記する
+# TODO: SMを使ったSecretの設定を追記する
+
 ########################################
 # VPC
 ########################################
@@ -7,7 +17,7 @@ module "vpc" {
   name                                 = var.app_name
   cidr                                 = var.cidr
   azs                                  = var.azs
-  cluster_name                         = local.cluster_name
+  cluster_name                         = var.cluster_name
   private_subnets                      = var.private_subnets
   public_subnets                       = var.public_subnets
   database_subnets                     = var.database_subnets
@@ -26,18 +36,8 @@ module "vpc" {
   ## Public Bastion Security Group ##
   public_bastion_ingress_with_cidr_blocks = var.public_bastion_ingress_with_cidr_blocks
 
-  ## Private Security Group ##
-  # bastion EC2 not created yet
-  # bastion_sg_id  = module.bastion.security_group_id
-
-  ## Database security group ##
-  # DB Controller EC2 not created yet
-  # databse_computed_ingress_with_db_controller_source_security_group_id = module.db_controller_instance.security_group_id
-  create_eks = var.create_eks
-  # pass EKS worker SG to DB SG after creating EKS module at composition layer
+  create_eks                                                         = var.create_eks
   databse_computed_ingress_with_eks_worker_source_security_group_ids = local.databse_computed_ingress_with_eks_worker_source_security_group_ids
-
-  # cluster_name = local.cluster_name
 
   ## Common tag metadata ##
   env      = var.env
@@ -66,50 +66,32 @@ module "bastion" {
 # EKS
 ########################################
 module "eks" {
-  source = "../../../../infrastructure_modules/eks-state"
+  source = "../../../../infrastructure_modules/self-managed-node-eks"
 
-  ## EKS ##
-  create_eks                     = var.create_eks
-  cluster_version                = var.cluster_version
-  cluster_name                   = local.cluster_name
-  cluster_endpoint_public_access = var.cluster_endpoint_public_access
-  vpc_id                         = module.vpc.vpc_id
-  subnets                        = module.vpc.private_subnets
-
-  # note: either pass worker_groups or node_groups
-  # this is for (EKSCTL API) unmanaged node group
-  self_managed_node_groups = var.self_managed_node_groups
-
-  # this is for (EKS API) managed node group
-  eks_managed_node_groups = var.eks_managed_node_groups
-
-  manage_aws_auth_configmap = var.manage_aws_auth_configmap
-  create_aws_auth_configmap = var.create_aws_auth_configmap
-  # add roles that can access K8s cluster
-  aws_auth_roles = local.aws_auth_roles
-  # add IAM users who can access K8s cluster
-  aws_auth_users = var.aws_auth_users
-
-  enabled_cluster_log_types     = var.enabled_cluster_log_types
-  cluster_log_retention_in_days = var.cluster_log_retention_in_days
-
-  ## IRSA (IAM role for service account) ##
-  enable_irsa = var.enable_irsa
-
-  test_irsa_service_account_namespace          = var.test_irsa_service_account_namespace
-  test_irsa_service_account_name               = var.test_irsa_service_account_name
-  cluster_autoscaler_service_account_namespace = var.cluster_autoscaler_service_account_namespace
-  cluster_autoscaler_service_account_name      = var.cluster_autoscaler_service_account_name
-
-  ## EFS SG ##
-  vpc_cidr_block = module.vpc.vpc_cidr_block
-
-  ## EFS ##
-  efs_mount_target_subnet_ids = module.vpc.private_subnets
-
-  ## Common tag metadata ##
+  ## General ##
+  region   = var.region
   env      = var.env
   app_name = var.app_name
   tags     = local.eks_tags
-  region   = var.region
+
+  ## IAM ##
+  cluster_iam_role_additional_policies = {}
+
+  ## Access Entry ##
+  cluster_admin_role = ""
+
+  ## EKS ##
+  create_eks                             = var.create_eks
+  cluster_version                        = var.cluster_version
+  cluster_name                           = var.cluster_name
+  cluster_enabled_log_types              = var.cluster_enabled_log_types
+  subnets                                = module.vpc.private_subnets
+  cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
+  vpc_id                                 = module.vpc.vpc_id
+
+  ## Key Pair ##
+  node_instance_default_keypair = data.aws_key_pair.eks_node_key_pair.key_name
+
+  ## Node Group ##
+  node_groups = var.node_groups
 }

@@ -1,32 +1,12 @@
-########################################
-# Metadata
-########################################
+## Metatada ##
+variable "region" {}
 
-variable "env" {
-  description = "The name of the environment."
-  type        = string
-}
+variable "env" {}
 
-variable "region" {
-  type = string
-}
+variable "app_name" {}
 
-variable "role_name" {
-  type = string
-}
-
-variable "profile_name" {
-  type = string
-}
-
-variable "application_name" {
-  description = "The name of the application."
-  type        = string
-}
-
-variable "app_name" {
-  description = "The name of the application."
-  type        = string
+variable "tags" {
+  type = map(string)
 }
 
 variable "region_tag" {
@@ -41,135 +21,63 @@ variable "region_tag" {
   }
 }
 
-########################################
-# VPC
-########################################
-variable "cidr" {
-  description = "The CIDR block for the VPC. Default value is a valid CIDR, but not acceptable by AWS and should be overridden"
-  default     = "0.0.0.0/0"
+variable "environment_tag" {
+  type = map(any)
+
+  default = {
+    "prod"    = "prod"
+    "qa"      = "qa"
+    "staging" = "staging"
+    "dev"     = "dev"
+  }
 }
 
-variable "azs" {
-  description = "Number of availability zones to use in the region"
-  type        = list(string)
+## IAM ##
+variable "cluster_iam_role_additional_policies" {
+  description = "Additional IAM policies to attach to the EKS cluster role"
+  type        = map(string)
 }
 
-variable "public_subnets" {
-  description = "A list of public subnets inside the VPC"
-  default     = []
-}
-
-variable "private_subnets" {
-  description = "A list of private subnets inside the VPC"
-  default     = []
-}
-
-variable "database_subnets" {
-  description = "A list of database subnets inside the VPC"
-  default     = []
-}
-
-variable "enable_dns_hostnames" {
-  description = "Should be true to enable DNS hostnames in the VPC"
-  default     = true
-}
-
-variable "enable_dns_support" {
-  description = "Should be true to enable DNS support in the VPC"
-  default     = true
-}
-
-variable "enable_nat_gateway" {
-  description = "Should be true if you want to provision NAT Gateways for each of your private networks"
-  default     = true
-}
-
-variable "single_nat_gateway" {
-  description = "Should be true if you want to provision a single shared NAT Gateway across all of your private networks"
-  default     = true
-}
-
-variable "enable_flow_log" {
-  description = "Enable VPC flow logs"
-  default     = false
-}
-
-variable "create_flow_log_cloudwatch_log_group" {
-  description = "Create CloudWatch log group for VPC flow logs"
-  default     = false
-}
-
-variable "create_flow_log_cloudwatch_iam_role" {
-  description = "Create IAM role for VPC flow logs"
-  default     = false
-}
-
-variable "flow_log_max_aggregation_interval" {
-  description = "The maximum interval of time during which a flow is captured and aggregated into a flow log record"
-  type        = number
-  default     = null
-}
-
-## Public Security Group ##
-variable "public_ingress_with_cidr_blocks" {
-  type = list(any)
-}
-
-# Bastion Security Group
-variable "public_bastion_ingress_with_cidr_blocks" {
-  type = list(any)
-}
-
-## Database security group ##
-variable "databse_computed_ingress_with_db_controller_source_security_group_id" {
-  default = ""
-}
-variable "databse_computed_ingress_with_eks_worker_source_security_group_ids" {
-  type = list(object({
-    rule                     = string
-    source_security_group_id = string
-    description              = string
-  }))
-  default = []
-}
-
-########################################
-# Bastion
-########################################
-variable "bastion_instance_type" {
-  description = "EC2 Instance Type"
+## Access Entry ##
+variable "cluster_admin_role" {
+  description = "IAM role to attach to the EKS cluster to allow full access"
   type        = string
 }
 
-variable "bastion_instance_monitoring" {
-  description = "Enable Monitoring for EC2 Instance"
-  type        = bool
-}
-
-
-########################################
-# EKS
-########################################
-variable "create_eks" {
-  description = "Create EKS cluster"
-  type        = bool
-
-}
-variable "cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
+## EKS ##
+variable "create_eks" {}
 variable "cluster_version" {
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
 }
+variable "cluster_name" {}
 variable "cluster_enabled_log_types" {
   description = "A list of the desired control plane logs to enable. For more information, see Amazon EKS Control Plane Logging documentation (https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html)"
   type        = list(string)
+  default     = ["audit", "api", "authenticator"]
+}
+variable "subnets" {
+  type = list(string)
+}
+variable "cluster_endpoint_public_access_cidrs" {
+  type        = list(string)
+  description = "Value of the CIDR block that can access the public endpoint of the EKS cluster"
+  default     = ["0.0.0.0/0"]
+}
+variable "cluster_service_ipv4_cidr" {
+  description = "CIDR block for the Kubernetes service IPs"
+  type        = string
+  default     = "172.20.0.0/16"
 }
 variable "cloudwatch_log_group_retention_in_days" {
   description = "Number of days to retain log events. If cluster_enabled_log_types is empty, this will be ignored."
   type        = number
+}
+variable "vpc_id" {}
+
+variable "node_instance_default_keypair" {
+  description = "The key pair to use for SSH access to the EC2 instances"
+  type        = string
 }
 
 ## Self Managed Node Group ##
@@ -332,42 +240,46 @@ variable "node_groups" {
 #     iam_role_policy_statements             = optional(list(any))
 #     launch_template_default_version        = optional(string)
 #     update_launch_template_default_version = optional(bool)
-#     block_device_mappings = optional(object({
+#     block_device_mappings = optional(list(object({
 #       device_name = string
 #       ebs = object({
-#         volume_size           = optional(number)
-#         volume_type           = optional(string)
-#         delete_on_termination = optional(bool)
-#         encrypted             = optional(bool)
-#         kms_key_id            = optional(string)
+#         delete_on_termination = bool
+#         encrypted             = bool
+#         iops                  = number
+#         kms_key_id            = string
+#         snapshot_id           = string
+#         volume_size           = number
+#         volume_type           = string
 #       })
-#     }))
+#       no_device = string
+#       virtual_name = string
+#     })))
 #     # 予約インスタンスを使用する場合は以下の設定を追加
 #     capacity_reservation_specification = optional(object({
 #       capacity_reservation_preference = string
-#       capacity_reservation_target = object({
-#         capacity_reservation_id                 = string
-#         capacity_reservation_resource_group_arn = string
-#       })
+#       capacity_reservation_target = optional(object({
+#         capacity_reservation_id                 = optional(string)
+#         capacity_reservation_resource_group_arn = optional(string)
+#       }))
 #     }))
 #     # CPUの使用限界を設定する場合は以下の設定を追加(サポートしていないInstanceTypeもある)
 #     cpu_options = optional(object({
-#       core_count       = number
-#       threads_per_core = number
+#       core_count       = optional(number)
+#       threads_per_core = optional(number)
 #     }))
 #     # クレジットスペック(クレジットが尽きるとCPUが低下する(T2でDefault) or 追加課金される(T3でDefault)など)の設定を行う場合は以下の設定を追加
 #     credit_specification = optional(object({
-#       cpu_credits = string
+#       cpu_credits = optional(string)
 #     }))
 #     # グラフィックス集約型や機械学習などでの利用では特に有効だが, 現段階でWindowsのみ対応
 #     elastic_gpu_specifications = optional(list(object({
-#       type = string
+#       type = optional(string)
 #     })))
 #     # GPUを使用することなく, ディープラーニング推論作業のコスト効率を大幅に向上
 #     elastic_inference_accelerator = optional(map(string))
 #     # AWSのNitroシステム上で動作する分離された, セキュリティに特化した環境を提供する技術であるNitro Enclavesを使用するための設定オプション
 #     enclave_options = optional(object({
-#       enabled = bool
+#       enabled = optional(bool)
 #     }))
 #     # Spotインスタンスを使用したい場合
 #     instance_market_options = optional(object({

@@ -1,9 +1,8 @@
-# TODO: Setup Managed Prometheus and Grafana
 ########################################
 ## EKS
 ########################################
 module "eks" {
-  source = "./resource_modules/container/eks"
+  source = "../../resource_modules/container/eks"
 
   create = var.create_eks
   # 作成される全リソースに付与されるタグ
@@ -46,10 +45,11 @@ module "eks" {
 
   # External encryption key
   # 変更した際は, 既存のクラスタを削除して再作成する必要がある
-  create_kms_key = false
+  # create_kms_key = false
+  create_kms_key = true
   cluster_encryption_config = {
-    resources        = ["secrets"]
-    provider_key_arn = module.cluster_encryption_kms.key_arn
+    resources = ["secrets"]
+    # provider_key_arn = module.cluster_encryption_kms.key_arn
   }
 
   # iam roleを作成する場合(create_iam_role=true)でかつ, enable_cluster_encryption_config=trueの場合
@@ -89,9 +89,9 @@ module "eks" {
   # しなければ, 自動で作成される
   create_cloudwatch_log_group            = local.create_cloudwatch_log_group
   cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
-  cloudwatch_log_group_kms_key_id        = local.create_cloudwatch_log_group ? module.cluster_logging_kms.key_arn : null
-  cloudwatch_log_group_class             = "STANDARD"
-  cloudwatch_log_group_tags              = {}
+  # cloudwatch_log_group_kms_key_id        = local.create_cloudwatch_log_group ? module.cluster_logging_kms.key_arn : null
+  cloudwatch_log_group_class = "STANDARD"
+  cloudwatch_log_group_tags  = {}
 
   ########################################
   ## Security Group
@@ -166,6 +166,23 @@ module "eks" {
   ################################################################################
   ## Cluster IAM Role
   ################################################################################
+  # 1. IAMロールが作成される
+  # 2. 作成されたIAMロールには, sts:AssumeRoleのためのasumePolicyが付与される
+  # -> EKSサービスがこれをassumeすることが可能になる
+  # 3. AmazonEKSClusterPolicy, AmazonEKSVPCResourceControllerのポリシーがアタッチされる
+  # 4. roleにadditional_policiesで指定したポリシーがアタッチされる
+  # 5. KMSキーが指定されている場合, そのキーに対するポリシーがアタッチされる
+  create_iam_role                           = true
+  iam_role_name                             = local.cluster_iam_role_name
+  iam_role_use_name_prefix                  = false
+  iam_role_description                      = local.cluster_iam_role_description
+  iam_role_additional_policies              = var.cluster_iam_role_additional_policies
+  iam_role_tags                             = local.cluster_iam_role_tags
+  cluster_encryption_policy_use_name_prefix = false
+  cluster_encryption_policy_name            = local.cluster_encryption_policy_name
+  cluster_encryption_policy_description     = local.cluster_encryption_policy_description
+  cluster_encryption_policy_path            = local.cluster_encryption_policy_path
+  cluster_encryption_policy_tags            = local.cluster_encryption_policy_tags
 
   ################################################################################
   ## EKS Addons
@@ -188,57 +205,73 @@ module "eks" {
   ## Self Managed Node Group
   ################################################################################
   # self_managed_node_groupsのほうが優先される
-  # use KMS key to encrypt EKS worker node's root EBS volumes
   self_managed_node_group_defaults = {
-    key_name                 = var.node_instance_keypair.key_name
-    use_name_prefix          = false
-
-    # iam_role_additional_policies = {}
+    key_name = var.node_instance_default_keypair
   }
   self_managed_node_groups = local.node_groups
 }
 
 ########################################
+## IAM Policy
+########################################
+# module "cluster_autoscaler_iam_policy" {
+#   source = "../../resource_modules/identity/iam/modules/iam-policy"
+
+#   description = local.cluster_autoscaler_policy_description
+#   name        = local.cluster_autoscaler_policy_name
+#   path        = local.cluster_autoscaler_policy_path
+#   tags        = local.cluster_autoscaler_policy_tags
+#   policy      = data.aws_iam_policy_document.cluster_autoscaler.json
+# }
+
+# resource "aws_iam_role_policy_attachment" "cluster_node_autoscaler_iam_policy_attachment" {
+#   for_each = local.node_groups
+
+#   policy_arn = module.cluster_autoscaler_iam_policy.arn
+#   role       = "EKSNode${var.cluster_name}Role-${try(each.value.name, "default")}"
+# }
+
+########################################
 ## KMS
 ########################################
-module "cluster_encryption_kms" {
-  source = "../../resource_modules/identity/kms"
+# module "cluster_encryption_kms" {
+#   source = "../../resource_modules/identity/kms"
 
-  create = var.create_eks
+#   create = var.create_eks
 
-  description             = local.k8s_secret_kms_key_description
-  key_usage               = "ENCRYPT_DECRYPT"
-  deletion_window_in_days = local.k8s_secret_kms_key_deletion_window_in_days
-  enable_key_rotation     = true
+#   description             = local.k8s_secret_kms_key_description
+#   key_usage               = "ENCRYPT_DECRYPT"
+#   deletion_window_in_days = local.k8s_secret_kms_key_deletion_window_in_days
+#   enable_key_rotation     = true
 
-  # Policy
-  enable_default_policy = true
-  key_owners            = []
-  # add Cluster Admin?
-  key_administrators = []
-  # add Cluster role
-  key_users         = ["cluster-role"]
-  key_service_users = []
-  # s3へのReadアクセスが必要な場合
-  # policy = data.aws_iam_policy.s3_read_only_access_policy.json
-  tags = local.k8s_secret_kms_key_tags
-}
+#   # Policy
+#   enable_default_policy = true
+#   key_owners            = []
+#   # add Cluster Admin?
+#   key_administrators = []
+#   # add Cluster role
+#   key_users         = [module.eks.cluster_iam_role_arn]
+#   key_service_users = []
+#   # s3へのReadアクセスが必要な場合
+#   # policy = data.aws_iam_policy.s3_read_only_access_policy.json
+#   tags = local.k8s_secret_kms_key_tags
+# }
 
-module "cluster_logging_kms" {
-  source = "../../resource_modules/identity/kms"
+# module "cluster_logging_kms" {
+#   source = "../../resource_modules/identity/kms"
 
-  create = local.create_cloudwatch_log_group
+#   create = local.create_cloudwatch_log_group
 
-  description             = local.eks_cloudwatch_kms_key_description
-  key_usage               = "ENCRYPT_DECRYPT"
-  deletion_window_in_days = local.eks_cloudwatch_kms_key_deletion_window_in_days
-  enable_key_rotation     = true
+#   description             = local.eks_cloudwatch_kms_key_description
+#   key_usage               = "ENCRYPT_DECRYPT"
+#   deletion_window_in_days = local.eks_cloudwatch_kms_key_deletion_window_in_days
+#   enable_key_rotation     = true
 
-  # Policy
-  enable_default_policy = true
-  policy                = data.aws_iam_policy_document.cloudwatch.json
-  tags                  = local.eks_cloudwatch_kms_key_tags
-}
+#   # Policy
+#   enable_default_policy = true
+#   policy                = data.aws_iam_policy_document.cloudwatch.json
+#   tags                  = local.eks_cloudwatch_kms_key_tags
+# }
 
 # IRSA ##
 # module "cluster_autoscaler_iam_assumable_role" {
@@ -249,16 +282,6 @@ module "cluster_logging_kms" {
 #   provider_url                  = replace(module.eks_cluster.cluster_oidc_issuer_url, "https://", "")
 #   role_policy_arns              = [module.cluster_autoscaler_iam_policy.arn]
 #   oidc_fully_qualified_subjects = ["system:serviceaccount:${var.cluster_autoscaler_service_account_namespace}:${var.cluster_autoscaler_service_account_name}"]
-# }
-
-# module "cluster_autoscaler_iam_policy" {
-#   source = "../../resource_modules/identity/iam/modules/iam-policy"
-
-#   create_policy = var.create_eks ? true : false
-#   description   = local.cluster_autoscaler_iam_policy_description
-#   name          = local.cluster_autoscaler_iam_policy_name
-#   path          = local.cluster_autoscaler_iam_policy_path
-#   policy        = data.aws_iam_policy_document.cluster_autoscaler.json
 # }
 
 ## test_irsa_iam_assumable_role ##
@@ -272,127 +295,4 @@ module "cluster_logging_kms" {
 #     data.aws_iam_policy.s3_read_only_access_policy.arn # <------- reference AWS Managed IAM policy ARN
 #   ]
 #   oidc_fully_qualified_subjects = ["system:serviceaccount:${var.test_irsa_service_account_namespace}:${var.test_irsa_service_account_name}"]
-# }
-
-# Ref: https://docs.aws.amazon.com/efs/latest/ug/network-access.html
-# module "efs_security_group" {
-#   source = "../../resource_modules/compute/sg"
-
-#   name        = local.efs_security_group_name
-#   description = local.efs_security_group_description
-#   vpc_id      = var.vpc_id
-
-#   ingress_with_cidr_blocks                                 = local.efs_ingress_with_cidr_blocks
-#   computed_ingress_with_cidr_blocks                        = local.efs_computed_ingress_with_cidr_blocks
-#   number_of_computed_ingress_with_cidr_blocks              = local.efs_number_of_computed_ingress_with_cidr_blocks
-#   computed_ingress_with_source_security_group_id           = local.efs_computed_ingress_with_source_security_group_id
-#   number_of_computed_ingress_with_source_security_group_id = local.efs_computed_ingress_with_source_security_group_count
-
-#   egress_rules = ["all-all"]
-
-#   tags = local.efs_security_group_tags
-# }
-
-# module "efs" {
-#   source = "../../resource_modules/storage/efs"
-
-#   ## EFS FILE SYSTEM ##
-#   encrypted = local.efs_encrypted
-#   tags      = local.efs_tags
-
-#   ## EFS MOUNT TARGET ##
-#   # mount_target_subnet_ids = var.efs_mount_target_subnet_ids
-#   # security_group_ids      = [module.efs_security_group.security_group_id]
-# }
-
-# Create IAM Role
-# resource "aws_iam_role" "eks_master_role" {
-#   name = "${local.name}-eks-master-role"
-
-#   assume_role_policy = <<POLICY
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Effect": "Allow",
-#       "Principal": {
-#         "Service": "eks.amazonaws.com"
-#       },
-#       "Action": "sts:AssumeRole"
-#     }
-#   ]
-# }
-# POLICY
-# }
-
-# # Associate IAM Policy to IAM Role
-# resource "aws_iam_role_policy_attachment" "eks-AmazonEKSClusterPolicy" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-#   role       = aws_iam_role.eks_master_role.name
-# }
-
-# resource "aws_iam_role_policy_attachment" "eks-AmazonEKSVPCResourceController" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-#   role       = aws_iam_role.eks_master_role.name
-# }
-
-# resource "aws_iam_role" "eks_master_role" {
-#   name        = "${local.name}-eks-master-role"
-#   path        = var.iam_role_path
-#   description = var.iam_role_description
-
-#   assume_role_policy    = data.aws_iam_policy_document.assume_role_policy[0].json
-#   permissions_boundary  = var.iam_role_permissions_boundary
-#   force_detach_policies = true
-
-#   tags = merge(var.tags, var.iam_role_tags)
-# }
-
-# # Policies attached ref https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html
-# resource "aws_iam_role_policy_attachment" "this" {
-#   for_each = { for k, v in {
-#     AmazonEKSClusterPolicy         = local.create_outposts_local_cluster ? "${local.iam_role_policy_prefix}/AmazonEKSLocalOutpostClusterPolicy" : "${local.iam_role_policy_prefix}/AmazonEKSClusterPolicy",
-#     AmazonEKSVPCResourceController = "${local.iam_role_policy_prefix}/AmazonEKSVPCResourceController",
-#   } : k => v if local.create_iam_role }
-
-#   policy_arn = each.value
-#   role       = aws_iam_role.this[0].name
-# }
-
-# resource "aws_iam_role_policy_attachment" "additional" {
-#   for_each = { for k, v in var.iam_role_additional_policies : k => v if local.create_iam_role }
-
-#   policy_arn = each.value
-#   role       = aws_iam_role.this[0].name
-# }
-
-# # Using separate attachment due to `The "for_each" value depends on resource attributes that cannot be determined until apply`
-# resource "aws_iam_role_policy_attachment" "cluster_encryption" {
-#   policy_arn = aws_iam_policy.cluster_encryption[0].arn
-#   role       = aws_iam_role.this[0].name
-# }
-
-# resource "aws_iam_policy" "cluster_encryption" {
-#   name        = var.cluster_encryption_policy_use_name_prefix ? null : local.cluster_encryption_policy_name
-#   name_prefix = var.cluster_encryption_policy_use_name_prefix ? local.cluster_encryption_policy_name : null
-#   description = var.cluster_encryption_policy_description
-#   path        = var.cluster_encryption_policy_path
-
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Action = [
-#           "kms:Encrypt",
-#           "kms:Decrypt",
-#           "kms:ListGrants",
-#           "kms:DescribeKey",
-#         ]
-#         Effect   = "Allow"
-#         Resource = var.cluster_encryption_config.provider_key_arn
-#       },
-#     ]
-#   })
-
-#   tags = merge(var.tags, var.cluster_encryption_policy_tags)
 # }

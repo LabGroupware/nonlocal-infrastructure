@@ -19,6 +19,8 @@ echo "source <(kubectl completion bash)" >> ~/.bashrc
 source ~/.bashrc
 ```
 #### IAMユーザー作成
+> `Admin`(AdministratorAccessを持つ)というロールが既に作成されていることを前提とする.
+
 AWS上にAdministratorAccessを持つユーザーを作成後, アクセスキーを取得する.
 #### Profile登録
 ``` sh

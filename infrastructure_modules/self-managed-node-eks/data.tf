@@ -34,44 +34,36 @@ locals {
   ########################################
   ## Access Entry
   ########################################
-  access_entries = {
-    # cluster-administrator = {
-    #   principal_arn     = "arn:aws:iam::${data.aws_caller_identity.this.account_id}:role/${var.cluster_admin_role}"
-    #   type              = "STANDARD"
-    #   kubernetes_groups = []
+  admin_access_entry = var.create_admin_access_entry ? {
+    cluster-administrator = {
+      principal_arn     = data.aws_iam_role.admin[0].arn
+      type              = "STANDARD"
+      kubernetes_groups = []
 
-    #   policy_associations = {
-    #     admin = {
-    #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-    #       access_scope = {
-    #         type = "cluster"
-    #       }
-    #     }
-    #   }
-    # }
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+  } } : {}
+  additional_access_entries = {
+    for access_entry in var.additional_accesss_entries : access_entry.key => {
+      principal_arn     = access_entry.value.principal_arn
+      type              = "STANDARD"
+      kubernetes_groups = access_entry.value.kubernetes_groups
 
-    # developer = {
-    #   principal_arn     = "arn:aws:iam::123456789012:role/eks-developer"
-    #   type              = "STANDARD"
-    #   kubernetes_groups = []
-
-    #   policy_associations = {
-    #     default-service = {
-    #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSServicePolicy"
-    #       access_scope = {
-    #         namespaces = ["default"]
-    #         type       = "namespace"
-    #       }
-    #     }
-    #     cluster-read-only = {
-    #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterReadOnlyPolicy"
-    #       access_scope = {
-    #         type = "cluster"
-    #       }
-    #     }
-    #   }
-    # }
+      policy_associations = {
+        for policy_association in access_entry.value.policy_associations : policy_association.key => {
+          policy_arn   = policy_association.value.policy_arn
+          access_scope = policy_association.value.access_scope
+        }
+      }
+    }
   }
+  access_entries = merge(local.admin_access_entry, local.additional_access_entries)
 
   ########################################
   ##  KMS for K8s secret's DEK (data encryption key) encryption
@@ -255,6 +247,20 @@ locals {
       "InstanceName"                      = format("%s%s", local.node_instance_name_prefix, try(ng.name, "default"))
     }
   } }
+
+  ########################################
+  ##  IRSA
+  ########################################
+  irsa_iam_role_path = "/${var.app_name}/${var.env}/${var.region_tag[var.region]}/"
+}
+
+############################################
+## IAM Role
+############################################
+data "aws_iam_role" "admin" {
+  count = var.create_admin_access_entry ? 1 : 0
+
+  name = var.cluster_admin_role
 }
 
 ############################################

@@ -172,6 +172,31 @@ variable "cloudwatch_log_group_retention_in_days" {
   type        = number
 }
 
+variable "create_admin_access_entry" {
+  description = "Create admin access entry"
+  type        = bool
+}
+
+variable "cluster_admin_role" {
+  description = "The role name of the admin role"
+  type        = string
+}
+
+variable "additional_accesss_entries" {
+  description = "Additional access entries to add to the security group"
+  type = map(object({
+    principal_arn     = string
+    kubernetes_groups = list(string)
+    policy_associations = map(object({
+      policy_arn = string
+      access_scope = object({
+        type       = string
+        namespaces = list(string)
+      })
+    }))
+  }))
+}
+
 ## Self Managed Node Group ##
 variable "node_groups" {
   description = "Map of self-managed node group definitions to create"
@@ -432,3 +457,28 @@ variable "node_groups" {
 #     })))
 #   }))
 # }
+
+########################################
+# IRSA
+########################################
+variable "additional_irsa_roles" {
+  description = "Additional IAM roles to create for IRSA"
+  type = map(object({
+    role_name        = string
+    role_policy_arns = map(string)
+    cluster_service_accounts = map(object({
+      namespace               = string
+      service_account         = string
+      lables                  = map(string)
+      image_pull_secret_names = optional(list(string))
+    }))
+  }))
+}
+
+########################################
+##  EBS CSI Driver
+########################################
+variable "enable_ebs_csi" {
+  description = "Enable EBS CSI Driver"
+  type        = bool
+}

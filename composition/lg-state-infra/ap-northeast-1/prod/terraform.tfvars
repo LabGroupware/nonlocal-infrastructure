@@ -46,36 +46,51 @@ cluster_name                           = "EKSLGStateApNortheast1ProdCluster"
 cluster_version                        = "1.30"
 cluster_enabled_log_types              = ["audit", "api", "authenticator"]
 cloudwatch_log_group_retention_in_days = 90
+create_admin_access_entry              = true
+cluster_admin_role                     = "Admin"
+additional_accesss_entries             = {}
 node_groups = [
   {
     create_autoscaling_group = true
-    name                     = "cmd-app-1"
+    name                     = "app-1"
     ami_type                 = "AL2023_x86_64_STANDARD"
-    instance_type            = "m3.medium"
-    desired_size             = 1
-    min_size                 = 1
-    max_size                 = 2
-    block_device_mappings = {
-      device_name = "/dev/xvda"
-      ebs = {
-        volume_size           = 20
-        volume_type           = "gp3"
-        delete_on_termination = true
-        encrypted             = true
-      }
-    }
-    node_labels = "for=cmd-app"
-    node_taints = "dedicated=cmd-app:NoSchedule"
-  },
-  {
-    create_autoscaling_group = true
-    name                     = "query-app-1"
-    ami_type                 = "AL2023_x86_64_STANDARD"
-    instance_type            = "t3.medium"
+    instance_type            = "m3.large"
     desired_size             = 2
     min_size                 = 1
-    max_size                 = 3
-    # node_labels = "for=cmd-worker"
-    # node_taints = "dedicated=cmd-worker:NoSchedule"
+    max_size                 = 5
+    #   block_device_mappings = {
+    #     device_name = "/dev/xvda"
+    #     ebs = {
+    #       volume_size           = 20
+    #       volume_type           = "gp3"
+    #       delete_on_termination = true
+    #       encrypted             = true
+    #     }
+    #   }
+    node_labels = "for=app"
+    node_taints = "dedicated=app:NoSchedule"
   }
 ]
+########################################
+# EKS IRSA
+########################################
+additional_irsa_roles = {
+  # "app-1" = {
+  #   role_name = "app-1"
+  #   cluster_service_accounts = [
+  #     {
+  #       namespace         = "default"
+  #       service_account   = "default"
+  #       labels            = {}
+  #       image_pull_secret = ""
+  #     }
+  #   ]
+  #   role_policy_arns = [
+  #     "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+  #   ]
+  # }
+}
+########################################
+# EBS CSI Driver
+########################################
+enable_ebs_csi = true

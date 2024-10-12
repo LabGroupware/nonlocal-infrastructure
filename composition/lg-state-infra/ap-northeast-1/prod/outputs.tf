@@ -224,6 +224,11 @@ output "eks_cluster_oidc_issuer_url" {
   value       = module.eks.cluster_oidc_issuer_url
 }
 
+output "eks_cluster_oidc_provider_arn" {
+  description = "The ARN of the OIDC Provider"
+  value       = module.eks.cluster_oidc_provider_arn
+}
+
 output "eks_cluster_version" {
   description = "The Kubernetes server version for the EKS cluster."
   value       = module.eks.cluster_version

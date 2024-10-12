@@ -17,6 +17,11 @@ output "cluster_oidc_issuer_url" {
   value       = module.eks.cluster_oidc_issuer_url
 }
 
+output "cluster_oidc_provider_arn" {
+  description = "The ARN of the OIDC Provider"
+  value       = module.eks.cluster_oidc_provider_arn
+}
+
 output "cluster_arn" {
   description = "The Amazon Resource Name (ARN) of the cluster."
   value       = module.eks.cluster_arn

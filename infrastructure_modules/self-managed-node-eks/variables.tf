@@ -39,9 +39,29 @@ variable "cluster_iam_role_additional_policies" {
 }
 
 ## Access Entry ##
+variable "create_admin_access_entry" {
+  description = "Create an admin access entry in the security group"
+  type        = bool
+}
+
 variable "cluster_admin_role" {
   description = "IAM role to attach to the EKS cluster to allow full access"
   type        = string
+}
+
+variable "additional_accesss_entries" {
+  description = "Additional access entries to add to the security group"
+  type = map(object({
+    principal_arn     = string
+    kubernetes_groups = list(string)
+    policy_associations = map(object({
+      policy_arn = string
+      access_scope = object({
+        type       = string
+        namespaces = list(string)
+      })
+    }))
+  }))
 }
 
 ## EKS ##
@@ -344,3 +364,28 @@ variable "node_groups" {
 #     })))
 #   }))
 # }
+
+########################################
+##  IRSA
+########################################
+variable "additional_irsa_roles" {
+  description = "Additional IAM roles to create for IRSA"
+  type = map(object({
+    role_name        = string
+    role_policy_arns = map(string)
+    cluster_service_accounts = map(object({
+      namespace               = string
+      service_account         = string
+      lables                  = map(string)
+      image_pull_secret_names = optional(list(string))
+    }))
+  }))
+}
+
+########################################
+##  EBS CSI Driver
+########################################
+variable "enable_ebs_csi" {
+  description = "Enable EBS CSI Driver"
+  type        = bool
+}

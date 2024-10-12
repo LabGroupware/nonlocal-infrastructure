@@ -56,6 +56,12 @@ output "cluster_oidc_issuer_url" {
   value       = try(aws_eks_cluster.this[0].identity[0].oidc[0].issuer, null)
 }
 
+# Self Added: OIDC Provider ARN
+output "cluster_oidc_provider_arn" {
+  description = "The ARN of the OIDC Provider if `enable_irsa = true`"
+  value       = try(aws_iam_openid_connect_provider.oidc_provider[0].arn, null)
+}
+
 output "cluster_dualstack_oidc_issuer_url" {
   description = "Dual-stack compatible URL on the EKS cluster for the OpenID Connect identity provider"
   value       = local.dualstack_oidc_issuer_url

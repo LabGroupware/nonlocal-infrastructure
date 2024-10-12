@@ -78,7 +78,9 @@ module "eks" {
   cluster_iam_role_additional_policies = {}
 
   ## Access Entry ##
-  cluster_admin_role = ""
+  create_admin_access_entry  = var.create_admin_access_entry
+  cluster_admin_role         = var.cluster_admin_role
+  additional_accesss_entries = var.additional_accesss_entries
 
   ## EKS ##
   create_eks                             = var.create_eks
@@ -94,4 +96,10 @@ module "eks" {
 
   ## Node Group ##
   node_groups = var.node_groups
+
+  ## IRSA ##
+  additional_irsa_roles = var.additional_irsa_roles
+
+  ## EBS CSI Driver ##
+  enable_ebs_csi = var.enable_ebs_csi
 }

@@ -198,17 +198,18 @@ aws s3api delete-bucket --bucket $S3_LG_STATE_MANAGE_BUCKET --region ap-northeas
 ```
 
 #### State研究の開始時
-terraform applyの実行
+terraform applyの実行(30分くらいかかる)
 ``` sh
 terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod apply
 ```
 
+kubeconfig(context)の変更
 ``` sh
 aws eks update-kubeconfig --region ap-northeast-1 --name EKSLGStateApNortheast1ProdCluster
 ```
 
 #### State研究の終了時
-terraform destroyの実行
+terraform destroyの実行(5分くらいかかる)
 ``` sh
 terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod destroy
 ```

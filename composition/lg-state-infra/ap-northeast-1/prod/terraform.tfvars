@@ -2,7 +2,6 @@
 # Environment setting
 ########################################
 region           = "ap-northeast-1"
-role_name        = "Admin"
 profile_name     = "terraform"
 env              = "prod"
 application_name = "lg-state-infra"
@@ -42,19 +41,33 @@ bastion_instance_monitoring = false
 # EKS
 ########################################
 create_eks                             = true
-cluster_name                           = "EKSLGStateApNortheast1ProdCluster"
+cluster_name                           = "LGStateApNortheast1Prod"
 cluster_version                        = "1.30"
 cluster_enabled_log_types              = ["audit", "api", "authenticator"]
 cloudwatch_log_group_retention_in_days = 90
 create_admin_access_entry              = true
-cluster_admin_role                     = "Admin"
-additional_accesss_entries             = {}
+cluster_admin_role                     = "ClusterAdmin"
+additional_accesss_entries = {
+  # "User1" = {
+  #   principal_arn = "arn:aws:iam::123456789012:role/User1"
+  #   kubernetes_groups = []
+  #   policy_associations = {
+  #     "AmazonEKS_CNI_Policy" = {
+  #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+  #       access_scope = {
+  #         type       = "namespace"
+  #         namespaces = ["service1"]
+  #       }
+  #     }
+  #   }
+  # }
+}
 node_groups = [
   {
     create_autoscaling_group = true
     name                     = "app-1"
     ami_type                 = "AL2023_x86_64_STANDARD"
-    instance_type            = "m3.large"
+    instance_type            = "t3.medium"
     desired_size             = 2
     min_size                 = 1
     max_size                 = 5
@@ -94,3 +107,28 @@ additional_irsa_roles = {
 # EBS CSI Driver
 ########################################
 enable_ebs_csi = true
+########################################
+##  EFS CSI Driver
+########################################
+enable_efs_csi = false
+# --- Istio ---
+##############################################
+# ACM + Route53
+##############################################
+route53_zone_domain_name  = "cresplanex.org"
+acm_domain_name           = "*.state.api.cresplanex.org"
+subject_alternative_names = ["state.api.cresplanex.org"]
+aws_route53_record_ttl    = 300
+##############################################
+# Route53 Config
+##############################################
+cluster_private_zone = "eks.local"
+##############################################
+# Istio
+##############################################
+istio_version              = "1.23.2"
+istio_ingress_min_pods     = 1
+istio_ingress_max_pods     = 5
+kiail_version              = "1.89.7"
+kiali_virtual_service_host = "kiali.state.api.cresplanex.org"
+

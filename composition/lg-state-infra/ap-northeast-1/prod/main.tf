@@ -1,12 +1,13 @@
 # TODO: NodeのLabel, Taintの設定修正
 # TODO: Block Device Mountの確認
-# TODO: Access Entryの作成
-# TODO: EBS, EFSのPersistent Volumeの設定を追記する
-# TODO: IRSAの設定を追記する
+# TODO: EFSのPersistent Volumeの設定を追記する
+# TODO: Storage Classの設定を追記する
 # TODO: BasionからEKS Nodeへのアクセスを許可するための設定を追記する
 # (security group + instance profile(iam role))
 # TODO: PrometheusとGrafanaの設定を追記する
 # TODO: SMを使ったSecretの設定を追記する
+# TODO: Load Balancerの設定を追記する
+# TODO: Cluster Autoscalerの設定を追記する
 
 ########################################
 # VPC
@@ -69,10 +70,12 @@ module "eks" {
   source = "../../../../infrastructure_modules/self-managed-node-eks"
 
   ## General ##
-  region   = var.region
-  env      = var.env
-  app_name = var.app_name
-  tags     = local.eks_tags
+  account_id   = data.aws_caller_identity.this.account_id
+  profile_name = var.profile_name
+  region       = var.region
+  env          = var.env
+  app_name     = var.app_name
+  tags         = local.eks_tags
 
   ## IAM ##
   cluster_iam_role_additional_policies = {}
@@ -102,4 +105,37 @@ module "eks" {
 
   ## EBS CSI Driver ##
   enable_ebs_csi = var.enable_ebs_csi
+
+  ## EFS CSI Driver ##
+  enable_efs_csi = var.enable_efs_csi
+
+  ## Istio ##
+  ##############################################
+  # ACM + Route53
+  ##############################################
+  route53_zone_domain_name  = var.route53_zone_domain_name
+  acm_domain_name           = var.acm_domain_name
+  subject_alternative_names = var.subject_alternative_names
+  aws_route53_record_ttl    = 300
+  ##############################################
+  # ELB
+  ##############################################
+  nlb_ingress_internal = false
+  lb_subnet_ids        = module.vpc.public_subnets
+  proxy_protocol_v2    = true
+  enable_vpc_link      = false
+  #########################
+  # Route53 Config
+  #########################
+  cluster_private_zone = var.cluster_private_zone
+  ##############################################
+  # Istio
+  ##############################################
+  istio_version              = var.istio_version
+  istio_ingress_min_pods     = var.istio_ingress_min_pods
+  istio_ingress_max_pods     = var.istio_ingress_max_pods
+  kiail_version              = var.kiail_version
+  kiali_virtual_service_host = var.kiali_virtual_service_host
+
+  # depends_on = [  ]
 }

@@ -6,7 +6,6 @@ locals {
   ## EKS IAM Role
   ########################################
   cluster_iam_role_name        = "EKS${var.cluster_name}Role"
-  cluster_iam_role_path        = "/${var.app_name}/${var.env}/${var.region_tag[var.region]}/"
   cluster_iam_role_description = "IAM role for EKS cluster ${var.cluster_name}"
   cluster_iam_role_tags = merge(
     tomap({
@@ -21,19 +20,27 @@ locals {
       "Name" = local.cluster_encryption_policy_name
     })
   )
-  # cluster_autoscaler_policy_name        = "EKS${var.cluster_name}ClusterNodeAutoscaler"
-  # cluster_autoscaler_policy_description = "EKS cluster node autoscaler policy for cluster ${var.cluster_name}"
-  # cluster_autoscaler_policy_path        = "/${var.app_name}/${var.env}/${var.region_tag[var.region]}/"
-  # cluster_autoscaler_policy_tags = merge(
-  #   tomap({
-  #     "Name" = local.cluster_autoscaler_policy_name
-  #   })
-  # )
   dataplane_wait_duration = "30s"
 
   ########################################
   ## Access Entry
   ########################################
+  executors = {
+    executor = {
+      principal_arn     = "arn:aws:iam::${data.aws_caller_identity.this.account_id}:user/${var.profile_name}"
+      type              = "STANDARD"
+      kubernetes_groups = []
+
+      policy_associations = {
+        "cluster-autoscaler" = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
   admin_access_entry = var.create_admin_access_entry ? {
     cluster-administrator = {
       principal_arn     = data.aws_iam_role.admin[0].arn
@@ -63,7 +70,7 @@ locals {
       }
     }
   }
-  access_entries = merge(local.admin_access_entry, local.additional_access_entries)
+  access_entries = merge(local.executors, local.admin_access_entry, local.additional_access_entries)
 
   ########################################
   ##  KMS for K8s secret's DEK (data encryption key) encryption
@@ -108,6 +115,7 @@ locals {
   node_security_group_name        = "scg-${var.app_name}-${var.region_tag[var.region]}-${var.env}-node"
   node_security_group_description = "Security group for node subnets"
 
+  iam_role_path = "/${var.app_name}/${var.env}/${var.region_tag[var.region]}/"
   ########################################
   ## EKS Node Group
   ########################################
@@ -218,7 +226,7 @@ locals {
     iam_role_name               = "EKSNode${var.cluster_name}Role-${try(ng.name, "default")}"
     iam_role_use_name_prefix    = false
     iam_role_description        = "IAM role for EKS node group ${var.cluster_name} ${try(ng.name, "default")}"
-    iam_role_path               = "/${var.app_name}/${var.env}/${var.region_tag[var.region]}/"
+    iam_role_path               = local.iam_role_path
     iam_role_tags = merge(
       tomap({
         "Name" = "EKSNode${var.cluster_name}Role-${try(ng.name, "default")}"
@@ -247,11 +255,6 @@ locals {
       "InstanceName"                      = format("%s%s", local.node_instance_name_prefix, try(ng.name, "default"))
     }
   } }
-
-  ########################################
-  ##  IRSA
-  ########################################
-  irsa_iam_role_path = "/${var.app_name}/${var.env}/${var.region_tag[var.region]}/"
 }
 
 ############################################
@@ -262,280 +265,3 @@ data "aws_iam_role" "admin" {
 
   name = var.cluster_admin_role
 }
-
-############################################
-## IAM Policy
-############################################
-
-# TODO: 上記のauto_scaler_policy = "arn:aws:iam::aws:policy/AutoScalingFullAccess"は権限が大きすぎるため、必要な権限のみを付与する
-## For Node Autoscaler
-# data "aws_iam_policy_document" "cluster_autoscaler" {
-#   statement {
-#     sid    = "ClusterAutoscalerAll"
-#     effect = "Allow"
-
-#     actions = [
-#       "autoscaling:DescribeAutoScalingGroups",
-#       "autoscaling:DescribeAutoScalingInstances",
-#       "autoscaling:DescribeLaunchConfigurations",
-#       "autoscaling:DescribeTags",
-#       "ec2:DescribeLaunchTemplateVersions",
-#       "ec2:DescribeInstanceTypes"
-#     ]
-
-#     resources = ["*"]
-#   }
-
-#   statement {
-#     sid    = "ClusterAutoscalerOwn"
-#     effect = "Allow"
-
-#     actions = [
-#       "autoscaling:SetDesiredCapacity",
-#       "autoscaling:TerminateInstanceInAutoScalingGroup",
-#       "autoscaling:UpdateAutoScalingGroup",
-#     ]
-
-#     resources = ["*"]
-
-#     condition {
-#       test     = "StringEquals"
-#       variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${module.eks.cluster_id}"
-#       values   = ["shared"]
-#     }
-
-#     condition {
-#       test     = "StringEquals"
-#       variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
-#       values   = ["true"]
-#     }
-#   }
-# }
-
-# For EKS Secret Encryption KMS
-# data "aws_iam_policy" "s3_read_only_access_policy" {
-#   arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-# }
-
-# For CloudWatch logging
-# data "aws_iam_policy_document" "cloudwatch" {
-#   statement {
-#     sid = "AllowCloudWatchLogs"
-#     actions = [
-#       "kms:Encrypt*",
-#       "kms:Decrypt*",
-#       "kms:ReEncrypt*",
-#       "kms:GenerateDataKey*",
-#       "kms:Describe*"
-#     ]
-#     effect = "Allow"
-#     principals {
-#       type = "Service"
-#       identifiers = [
-#         format(
-#           "logs.%s.amazonaws.com",
-#           var.region
-#         )
-#       ]
-#     }
-#     resources = ["*"]
-#     condition {
-#       test     = "ArnEquals"
-#       variable = "kms:EncryptionContext:aws:logs:arn"
-#       values = [
-#         format(
-#           "arn:aws:logs:%s:%s:log-group:*",
-#           var.region,
-#           data.aws_caller_identity.this.account_id
-#         )
-#       ]
-#     }
-#   }
-# }
-
-# data "aws_iam_policy_document" "cluster_autoscaler" {
-#   statement {
-#     sid    = "clusterAutoscalerAll"
-#     effect = "Allow"
-
-#     actions = [
-#       "autoscaling:DescribeAutoScalingGroups",
-#       "autoscaling:DescribeAutoScalingInstances",
-#       "autoscaling:DescribeLaunchConfigurations",
-#       "autoscaling:DescribeTags",
-#       "ec2:DescribeLaunchTemplateVersions",
-#       "ec2:DescribeInstanceTypes"
-#     ]
-
-#     resources = ["*"]
-#   }
-
-#   statement {
-#     sid    = "clusterAutoscalerOwn"
-#     effect = "Allow"
-
-#     actions = [
-#       "autoscaling:SetDesiredCapacity",
-#       "autoscaling:TerminateInstanceInAutoScalingGroup",
-#       "autoscaling:UpdateAutoScalingGroup",
-#     ]
-
-#     resources = ["*"]
-
-#     # limit who can assume the role
-#     # ref: https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-technical-overview.html
-#     # ref: https://www.terraform.io/docs/providers/aws/r/eks_cluster.html#enabling-iam-roles-for-service-accounts
-
-#     # [FIXED by using correct tag] ISSUE with below: SetDesiredCapacity operation: User: arn:aws:sts::XXX:assumed-role/EKSClusterAutoscaler/botocore-session-1588872862 is not authorized to perform: autoscaling:SetDesiredCapacity on resource: arn:aws:autoscaling:us-east-1:XXX:autoScalingGroup:b44f55c0-a6a9-4689-8651-7a72b7c6300a:autoScalingGroupName/eks-ue1-prod-XXX-api-infra-worker-group-staging-120200507173038542300000005
-#     condition {
-#       test     = "StringEquals"
-#       variable = "autoscaling:ResourceTag/kubernetes.io/cluster/${module.eks_cluster.cluster_id}"
-#       values   = ["shared"]
-#     }
-
-#     condition {
-#       test     = "StringEquals"
-#       variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled"
-#       values   = ["true"]
-#     }
-#   }
-# }
-
-# # ref: https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/examples/launch_templates_with_managed_node_groups/disk_encryption_policy.tf
-# # This policy is required for the KMS key used for EKS root volumes, so the cluster is allowed to enc/dec/attach encrypted EBS volumes
-# data "aws_iam_policy_document" "ebs_decryption" {
-#   # Copy of default KMS policy that lets you manage it
-#   statement {
-#     sid    = "Allow access for Key Administrators"
-#     effect = "Allow"
-
-#     principals {
-#       type        = "AWS"
-#       identifiers = ["arn:aws:iam::${data.aws_caller_identity.this.account_id}:root"]
-#     }
-
-#     actions = [
-#       "kms:*"
-#     ]
-
-#     resources = ["*"]
-#   }
-
-#   # Required for EKS
-#   statement {
-#     sid    = "Allow service-linked role use of the CMK"
-#     effect = "Allow"
-
-#     principals {
-#       type = "AWS"
-#       identifiers = [
-#         "arn:aws:iam::${data.aws_caller_identity.this.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling", # required for the ASG to manage encrypted volumes for nodes
-#         module.eks_cluster.cluster_iam_role_arn,
-#         "arn:aws:iam::${data.aws_caller_identity.this.account_id}:root", # required for the cluster / persistentvolume-controller to create encrypted PVCs
-#       ]
-#     }
-
-#     actions = [
-#       "kms:Encrypt",
-#       "kms:Decrypt",
-#       "kms:ReEncrypt*",
-#       "kms:GenerateDataKey*",
-#       "kms:DescribeKey"
-#     ]
-
-#     resources = ["*"]
-#   }
-
-#   statement {
-#     sid    = "Allow attachment of persistent resources"
-#     effect = "Allow"
-
-#     principals {
-#       type = "AWS"
-#       identifiers = [
-#         "arn:aws:iam::${data.aws_caller_identity.this.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling", # required for the ASG to manage encrypted volumes for nodes
-#         module.eks_cluster.cluster_iam_role_arn,                                                                                                 # required for the cluster / persistentvolume-controller to create encrypted PVCs
-#       ]
-#     }
-
-#     actions = [
-#       "kms:CreateGrant"
-#     ]
-
-#     resources = ["*"]
-
-#     condition {
-#       test     = "Bool"
-#       variable = "kms:GrantIsForAWSResource"
-#       values   = ["true"]
-#     }
-
-#   }
-# }
-
-# data "aws_iam_policy_document" "k8s_api_server_decryption" {
-#   # Copy of default KMS policy that lets you manage it
-#   statement {
-#     sid    = "Allow access for Key Administrators"
-#     effect = "Allow"
-
-#     principals {
-#       type        = "AWS"
-#       identifiers = ["arn:aws:iam::${data.aws_caller_identity.this.account_id}:root"]
-#     }
-
-#     actions = [
-#       "kms:*"
-#     ]
-
-#     resources = ["*"]
-#   }
-
-#   # Required for EKS
-#   statement {
-#     sid    = "Allow service-linked role use of the CMK"
-#     effect = "Allow"
-
-#     principals {
-#       type = "AWS"
-#       identifiers = [
-#         module.eks_cluster.cluster_iam_role_arn, # required for the cluster / persistentvolume-controller
-#         "arn:aws:iam::${data.aws_caller_identity.this.account_id}:root",
-#       ]
-#     }
-
-#     actions = [
-#       "kms:Encrypt",
-#       "kms:Decrypt",
-#       "kms:ReEncrypt*",
-#       "kms:GenerateDataKey*",
-#       "kms:DescribeKey"
-#     ]
-
-#     resources = ["*"]
-#   }
-
-#   statement {
-#     sid    = "Allow attachment of persistent resources"
-#     effect = "Allow"
-
-#     principals {
-#       type = "AWS"
-#       identifiers = [
-#         module.eks_cluster.cluster_iam_role_arn, # required for the cluster / persistentvolume-controller to create encrypted PVCs
-#       ]
-#     }
-
-#     actions = [
-#       "kms:CreateGrant"
-#     ]
-
-#     resources = ["*"]
-
-#     condition {
-#       test     = "Bool"
-#       variable = "kms:GrantIsForAWSResource"
-#       values   = ["true"]
-#     }
-#   }
-# }

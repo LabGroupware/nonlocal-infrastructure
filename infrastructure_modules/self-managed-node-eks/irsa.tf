@@ -10,7 +10,7 @@ module "iam_eks_role" {
 
   role_name        = each.value.role_name
   role_description = "IAM role for IRSA for ${each.value.role_name}"
-  role_path        = local.irsa_iam_role_path
+  role_path        = local.iam_role_path
   role_policy_arns = each.value.role_policy_arns
   oidc_providers = {
     main = {
@@ -27,8 +27,8 @@ resource "kubernetes_service_account_v1" "irsa_sa" {
   depends_on = [module.iam_eks_role]
 
   for_each = {
-    for role_key, role in var.additional_irsa_roles : "${role_key}-${each_key}" => {
-      for each_key, sa in role.cluster_service_accounts : "${role_key}-${each_key}-${sa.namespace}-${sa.service_account}" => {
+    for role_key, role in var.additional_irsa_roles : "${role_key}" => {
+      for each_key, sa in role.cluster_service_accounts : "${role_key}-${sa.namespace}-${sa.service_account}" => {
         role_key                = role_key
         namespace               = sa.namespace
         service_account         = sa.service_account

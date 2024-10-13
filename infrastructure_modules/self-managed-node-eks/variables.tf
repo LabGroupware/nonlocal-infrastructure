@@ -1,6 +1,10 @@
 ## Metatada ##
 variable "region" {}
 
+variable "profile_name" {}
+
+variable "account_id" {}
+
 variable "env" {}
 
 variable "app_name" {}
@@ -389,3 +393,169 @@ variable "enable_ebs_csi" {
   description = "Enable EBS CSI Driver"
   type        = bool
 }
+
+########################################
+##  EFS CSI Driver
+########################################
+variable "enable_efs_csi" {
+  description = "Enable EFS CSI Driver"
+  type        = bool
+}
+
+# --- Istio ---
+##############################################
+# ACM + Route53
+##############################################
+variable "route53_zone_domain_name" {
+  type        = string
+  description = "The domain name to use for the Route53 zone"
+}
+variable "acm_domain_name" {
+  type        = string
+  description = "The domain name to use for the ACM certificate"
+}
+variable "subject_alternative_names" {
+  type        = list(string)
+  description = "The subject alternative names to use for the ACM certificate"
+}
+variable "aws_route53_record_ttl" {
+  type        = number
+  description = "The TTL to use for the Route53 record"
+  default     = 300
+}
+
+##############################################
+# ELB
+##############################################
+variable "nlb_ingress_internal" {
+  type        = bool
+  description = "Indicates whether the Network Load Balancer (ELB) for the EKS cluster should be internal, restricting access to within the AWS network."
+  default     = false
+}
+
+variable "lb_subnet_ids" {
+  type        = list(string)
+  description = "The subnet IDs to use for the load balancer(Public Subnets)"
+}
+
+variable "proxy_protocol_v2" {
+  type        = bool
+  description = "Enables or disables Proxy Protocol v2 on the Network Load Balancer, used for preserving client IP addresses and other connection information."
+  default     = false
+}
+
+variable "enable_vpc_link" {
+  type        = bool
+  description = "Create VPC Link associated to Network Load Balancing (For API Gateway to communicate with EKS)"
+  default     = false
+}
+
+#########################
+# Route53 Config
+#########################
+
+variable "cluster_private_zone" {
+  type        = string
+  description = "The private DNS zone name for the EKS cluster in AWS Route53. This zone is used for internal DNS resolution within the cluster."
+  default     = "k8s.cluster"
+}
+
+##############################################
+# Istio
+##############################################
+
+variable "istio_version" {
+  type        = string
+  description = "The version of Istio to install"
+}
+
+variable "istio_ingress_min_pods" {
+  type        = number
+  description = "The minimum number of pods for the Istio ingress gateway"
+  default     = 1
+}
+
+variable "istio_ingress_max_pods" {
+  type        = number
+  description = "The maximum number of pods for the Istio ingress gateway"
+  default     = 5
+}
+
+variable "kiail_version" {
+  type        = string
+  description = "The version of Kiali to install"
+}
+
+variable "kiali_virtual_service_host" {
+  type        = string
+  description = "The hostname for the Kiali virtual service, a part of Istio's service mesh visualization. It provides insights into the mesh topology and performance."
+}
+
+##############################################
+# Prometheus + Grafana
+##############################################
+# variable "enable_prometheus" {
+#   type        = bool
+#   description = "Enable managed Prometheus"
+# }
+
+# variable "grafana_virtual_service_host" {
+#   type        = string
+#   description = "The hostname for the Grafana virtual service, used in Istio routing. This host is used to access Grafana dashboards for monitoring metrics."
+# }
+
+# variable "prometheus_access_type" {
+#   type        = string
+#   description = "Specifies the access type for managed Prometheus. 'CURRENT_ACCOUNT' limits access to the current AWS account, ensuring isolated and secure access to the monitoring data."
+#   default     = "CURRENT_ACCOUNT"
+# }
+
+# variable "grafana_permission_type" {
+#   type        = string
+#   description = "Defines the permission model for managed Grafana. 'SERVICE_MANAGED' allows AWS to manage permissions, simplifying the setup and management of Grafana."
+#   default     = "SERVICE_MANAGED"
+# }
+
+# variable "grafana_authentication_providers" {
+#   type        = list(string)
+#   description = "A list of authentication providers for managed Grafana. For example, 'SAML' can be used for integrating with identity providers, ensuring secure and centralized user management."
+#   default     = ["SAML"]
+# }
+
+# variable "grafana_datasources" {
+#   type        = list(string)
+#   description = "Specifies the data sources that managed Grafana can access. Includes options like 'CLOUDWATCH', 'PROMETHEUS', and 'XRAY', providing a wide range of data for comprehensive monitoring solutions."
+#   default     = ["CLOUDWATCH", "PROMETHEUS", "XRAY"]
+# }
+
+# variable "grafana_notification_destinations" {
+#   type        = list(string)
+#   description = "Lists the notification channels supported by managed Grafana. For instance, 'SNS' allows Grafana to send alerts and notifications through AWS Simple Notification Service."
+#   default     = ["SNS"]
+# }
+
+# variable "grafana_subnets" {
+#   type        = list(string)
+#   description = "The subnets to use for the managed Grafana workspace"
+# }
+
+# ##############################################
+# # Jaeger
+# ##############################################
+# variable "enable_jaeger" {
+#   type        = bool
+#   description = "Enable Jaeger for distributed tracing"
+# }
+
+# variable "jaeger_virtual_service_host" {
+#   type        = string
+#   description = "The hostname for the Jaeger virtual service, used in Istio routing. This host is used to access Jaeger for distributed tracing."
+# }
+
+# ##############################################
+# # Node termination handler
+# ##############################################
+# variable "node_termination_handler_toggle" {
+#   type        = bool
+#   description = "Enable the node termination handler"
+# }

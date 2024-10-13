@@ -48,3 +48,5 @@ operations/variable-scripts/variable.json
 
 # SSH private key
 *.id_rsa
+
+assume_role_output.json

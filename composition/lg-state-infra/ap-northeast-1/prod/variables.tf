@@ -11,10 +11,6 @@ variable "region" {
   type = string
 }
 
-variable "role_name" {
-  type = string
-}
-
 variable "profile_name" {
   type = string
 }
@@ -482,3 +478,75 @@ variable "enable_ebs_csi" {
   description = "Enable EBS CSI Driver"
   type        = bool
 }
+
+########################################
+##  EFS CSI Driver
+########################################
+variable "enable_efs_csi" {
+  description = "Enable EFS CSI Driver"
+  type        = bool
+}
+
+# --- Istio ---
+##############################################
+# ACM + Route53
+##############################################
+variable "route53_zone_domain_name" {
+  type        = string
+  description = "The domain name to use for the Route53 zone"
+}
+variable "acm_domain_name" {
+  type        = string
+  description = "The domain name to use for the ACM certificate"
+}
+variable "subject_alternative_names" {
+  type        = list(string)
+  description = "The subject alternative names to use for the ACM certificate"
+}
+variable "aws_route53_record_ttl" {
+  type        = number
+  description = "The TTL to use for the Route53 record"
+  default     = 300
+}
+
+#########################
+# Route53 Config
+#########################
+
+variable "cluster_private_zone" {
+  type        = string
+  description = "The private DNS zone name for the EKS cluster in AWS Route53. This zone is used for internal DNS resolution within the cluster."
+  default     = "k8s.cluster"
+}
+
+##############################################
+# Istio
+##############################################
+
+variable "istio_version" {
+  type        = string
+  description = "The version of Istio to install"
+}
+
+variable "istio_ingress_min_pods" {
+  type        = number
+  description = "The minimum number of pods for the Istio ingress gateway"
+  default     = 1
+}
+
+variable "istio_ingress_max_pods" {
+  type        = number
+  description = "The maximum number of pods for the Istio ingress gateway"
+  default     = 5
+}
+
+variable "kiail_version" {
+  type        = string
+  description = "The version of Kiali to install"
+}
+
+variable "kiali_virtual_service_host" {
+  type        = string
+  description = "The hostname for the Kiali virtual service, a part of Istio's service mesh visualization. It provides insights into the mesh topology and performance."
+}
+

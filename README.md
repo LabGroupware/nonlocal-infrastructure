@@ -10,6 +10,8 @@
 asdf plugin add terraform
 asdf plugin add awscli
 asdf plugin add kubectl
+asdf plugin add helm
+asdf plugin add istioctl
 asdf install
 ```
 #### Kubectlの補完
@@ -19,7 +21,8 @@ echo "source <(kubectl completion bash)" >> ~/.bashrc
 source ~/.bashrc
 ```
 #### IAMユーザー作成
-> `Admin`(AdministratorAccessを持つ)というロールが既に作成されていることを前提とする.
+> `ClusterAdmin`というロールが既に作成されていることを前提とする.
+> このロールは, `terraform`からassumeが可能である必要がある.
 
 AWS上にAdministratorAccessを持つユーザーを作成後, アクセスキーを取得する.
 #### Profile登録
@@ -207,7 +210,8 @@ terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod apply
 
 kubeconfig(context)の変更
 ``` sh
-aws eks update-kubeconfig --region ap-northeast-1 --name EKSLGStateApNortheast1ProdCluster
+export AWS_DEFAULT_PROFILE=terraform
+aws eks update-kubeconfig --region ap-northeast-1 --name LGStateApNortheast1Prod
 ```
 
 #### State研究の終了時

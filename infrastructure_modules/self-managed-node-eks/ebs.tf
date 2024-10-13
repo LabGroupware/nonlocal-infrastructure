@@ -7,9 +7,9 @@ module "ebs_csi_iam_role" {
 
   create_role = var.create_eks && var.enable_ebs_csi
 
-  role_name             = "ebs-csi-iam-role"
+  role_name             = format("%s-ebs-csi", var.cluster_name)
   role_description      = "IAM role for EBS CSI Driver"
-  role_path             = local.irsa_iam_role_path
+  role_path             = local.iam_role_path
   attach_ebs_csi_policy = true
   oidc_providers = {
     main = {
@@ -80,7 +80,7 @@ module "ebs_csi_iam_role" {
 ##########################################################################################
 resource "aws_eks_addon" "ebs_eks_addon" {
   depends_on               = [module.ebs_csi_iam_role]
-  cluster_name             = data.terraform_remote_state.eks.outputs.cluster_id
+  cluster_name             = var.cluster_name
   addon_name               = "aws-ebs-csi-driver"
   service_account_role_arn = module.ebs_csi_iam_role.iam_role_arn
 }

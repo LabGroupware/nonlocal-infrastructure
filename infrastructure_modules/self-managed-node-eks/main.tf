@@ -2,7 +2,7 @@
 ## EKS
 ########################################
 module "eks" {
-  source = "../../resource_modules/container/eks"
+  source     = "../../resource_modules/container/eks"
 
   create = var.create_eks
   # 作成される全リソースに付与されるタグ
@@ -135,16 +135,34 @@ module "eks" {
   # 1. 443(tcp)のClusterからのingressが許可されている(Cluster API to node groups)
   # 2. 10250(tcp)のClusterからのingressが許可されている(Cluster API to node kubelets)
   # 3. 53(tcp, udp)のselfからのingressが許可されている(Node to node CoreDNS)
-  node_security_group_additional_rules = {
-    # ingress_self_all = {
-    #   description = "Node to node all ports/protocols"
-    #   protocol    = "-1"
-    #   from_port   = 0
-    #   to_port     = 0
-    #   type        = "ingress"
-    #   self        = true
-    # },
-  }
+  node_security_group_additional_rules = merge({
+    ingress_15017 = {
+      description                   = "Cluster API - Istio Webhook namespace.sidecar-injector.istio.io"
+      protocol                      = "TCP"
+      from_port                     = 15017
+      to_port                       = 15017
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+    ingress_15012 = {
+      description                   = "Cluster API to nodes ports/protocols"
+      protocol                      = "TCP"
+      from_port                     = 15012
+      to_port                       = 15012
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+  })
+  # {
+  # ingress_self_all = {
+  #   description = "Node to node all ports/protocols"
+  #   protocol    = "-1"
+  #   from_port   = 0
+  #   to_port     = 0
+  #   type        = "ingress"
+  #   self        = true
+  # },
+  # }
   # node_security_group_enable_recommended_rulesをtrueにすると, 以下のルールが追加される
   # 1. Node to node ingress on ephemeral ports(1025-65535)
   # 2. Cluster API to node 4443/tcp webhook(metrics-server)
@@ -271,28 +289,4 @@ module "eks" {
 #   enable_default_policy = true
 #   policy                = data.aws_iam_policy_document.cloudwatch.json
 #   tags                  = local.eks_cloudwatch_kms_key_tags
-# }
-
-# IRSA ##
-# module "cluster_autoscaler_iam_assumable_role" {
-#   source = "../../resource_modules/identity/iam/modules/iam-assumable-role-with-oidc"
-
-#   create_role                   = var.create_eks ? true : false
-#   role_name                     = local.cluster_autoscaler_iam_role_name
-#   provider_url                  = replace(module.eks_cluster.cluster_oidc_issuer_url, "https://", "")
-#   role_policy_arns              = [module.cluster_autoscaler_iam_policy.arn]
-#   oidc_fully_qualified_subjects = ["system:serviceaccount:${var.cluster_autoscaler_service_account_namespace}:${var.cluster_autoscaler_service_account_name}"]
-# }
-
-## test_irsa_iam_assumable_role ##
-# module "test_irsa_iam_assumable_role" {
-#   source = "../../resource_modules/identity/iam/modules/iam-assumable-role-with-oidc"
-
-#   create_role  = var.create_eks ? true : false
-#   role_name    = local.test_irsa_iam_role_name
-#   provider_url = replace(module.eks_cluster.cluster_oidc_issuer_url, "https://", "")
-#   role_policy_arns = [
-#     data.aws_iam_policy.s3_read_only_access_policy.arn # <------- reference AWS Managed IAM policy ARN
-#   ]
-#   oidc_fully_qualified_subjects = ["system:serviceaccount:${var.test_irsa_service_account_namespace}:${var.test_irsa_service_account_name}"]
 # }

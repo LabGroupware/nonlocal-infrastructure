@@ -98,6 +98,11 @@ variable "cloudwatch_log_group_retention_in_days" {
   type        = number
 }
 variable "vpc_id" {}
+variable "vpc_cidr_block" {}
+
+variable "bastion_sg_id" {
+  type = string
+}
 
 variable "node_instance_default_keypair" {
   description = "The key pair to use for SSH access to the EC2 instances"
@@ -427,10 +432,15 @@ variable "aws_route53_record_ttl" {
 ##############################################
 # ELB
 ##############################################
-variable "nlb_ingress_internal" {
+variable "lb_ingress_internal" {
   type        = bool
   description = "Indicates whether the Network Load Balancer (ELB) for the EKS cluster should be internal, restricting access to within the AWS network."
   default     = false
+}
+
+variable "lb_security_group_id" {
+  type        = string
+  description = "The security group ID to use for the load balancer"
 }
 
 variable "lb_subnet_ids" {
@@ -453,6 +463,10 @@ variable "enable_vpc_link" {
 #########################
 # Route53 Config
 #########################
+variable "public_root_domain_name" {
+  type        = string
+  description = "The public DNS zone name for the EKS cluster in AWS Route53. This zone is used for external DNS resolution for the cluster."
+}
 
 variable "cluster_private_zone" {
   type        = string

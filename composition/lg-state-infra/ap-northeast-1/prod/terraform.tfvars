@@ -122,6 +122,7 @@ aws_route53_record_ttl    = 300
 ##############################################
 # Route53 Config
 ##############################################
+public_root_domain_name = "state.api.cresplanex.org"
 cluster_private_zone = "eks.local"
 ##############################################
 # Istio

@@ -50,3 +50,4 @@ operations/variable-scripts/variable.json
 *.id_rsa
 
 assume_role_output.json
+.ssh/config

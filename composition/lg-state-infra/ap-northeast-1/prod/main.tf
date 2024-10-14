@@ -7,7 +7,6 @@
 # TODO: PrometheusとGrafanaの設定を追記する
 # TODO: SMを使ったSecretの設定を追記する
 # TODO: Load Balancerの設定を追記する
-# TODO: Cluster Autoscalerの設定を追記する
 
 ########################################
 # VPC
@@ -93,6 +92,8 @@ module "eks" {
   subnets                                = module.vpc.private_subnets
   cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
   vpc_id                                 = module.vpc.vpc_id
+  vpc_cidr_block                         = module.vpc.vpc_cidr_block
+  bastion_sg_id                          = module.vpc.public_bastion_security_group_id
 
   ## Key Pair ##
   node_instance_default_keypair = data.aws_key_pair.eks_node_key_pair.key_name
@@ -120,14 +121,16 @@ module "eks" {
   ##############################################
   # ELB
   ##############################################
-  nlb_ingress_internal = false
+  lb_ingress_internal = false
+  lb_security_group_id = module.vpc.public_security_group_id
   lb_subnet_ids        = module.vpc.public_subnets
-  proxy_protocol_v2    = true
+  proxy_protocol_v2    = false
   enable_vpc_link      = false
   #########################
   # Route53 Config
   #########################
-  cluster_private_zone = var.cluster_private_zone
+  public_root_domain_name = var.public_root_domain_name
+  cluster_private_zone    = var.cluster_private_zone
   ##############################################
   # Istio
   ##############################################

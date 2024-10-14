@@ -512,6 +512,10 @@ variable "aws_route53_record_ttl" {
 #########################
 # Route53 Config
 #########################
+variable "public_root_domain_name" {
+  type        = string
+  description = "The public DNS zone name for the EKS cluster in AWS Route53. This zone is used for external DNS resolution for the cluster."
+}
 
 variable "cluster_private_zone" {
   type        = string

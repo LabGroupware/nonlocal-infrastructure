@@ -205,12 +205,14 @@ aws s3api delete-bucket --bucket $S3_LG_STATE_MANAGE_BUCKET --region ap-northeas
 #### State研究の開始時
 terraform applyの実行(30分くらいかかる)
 ``` sh
+export AWS_DEFAULT_PROFILE=terraform
+aws sts get-caller-identity
 terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod apply
 ```
 
 kubeconfig(context)の変更
 ``` sh
-export AWS_DEFAULT_PROFILE=terraform
+./assume_role.sh ClusterAdmin AdminSession
 aws eks update-kubeconfig --region ap-northeast-1 --name LGStateApNortheast1Prod
 ```
 
@@ -218,4 +220,16 @@ aws eks update-kubeconfig --region ap-northeast-1 --name LGStateApNortheast1Prod
 terraform destroyの実行(5分くらいかかる)
 ``` sh
 terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod destroy
+```
+
+### Nodeインスタンスでのデバッグについて
+VPC(Bastion)
+``` sh
+./generate_ssh_config.sh
+ssh -F ./.ssh/config lg_bastion
+```
+State
+``` sh
+./generate_ssh_config.sh
+ssh -F ./.ssh/config lg_eks_node
 ```

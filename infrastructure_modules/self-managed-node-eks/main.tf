@@ -2,7 +2,7 @@
 ## EKS
 ########################################
 module "eks" {
-  source     = "../../resource_modules/container/eks"
+  source = "../../resource_modules/container/eks"
 
   create = var.create_eks
   # 作成される全リソースに付与されるタグ
@@ -135,34 +135,57 @@ module "eks" {
   # 1. 443(tcp)のClusterからのingressが許可されている(Cluster API to node groups)
   # 2. 10250(tcp)のClusterからのingressが許可されている(Cluster API to node kubelets)
   # 3. 53(tcp, udp)のselfからのingressが許可されている(Node to node CoreDNS)
-  node_security_group_additional_rules = merge({
-    ingress_15017 = {
-      description                   = "Cluster API - Istio Webhook namespace.sidecar-injector.istio.io"
-      protocol                      = "TCP"
-      from_port                     = 15017
-      to_port                       = 15017
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-    ingress_15012 = {
-      description                   = "Cluster API to nodes ports/protocols"
-      protocol                      = "TCP"
-      from_port                     = 15012
-      to_port                       = 15012
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
+  node_security_group_additional_rules = merge(
+    {
+      from_vpc_status_port = {
+        description              = "Node Status Port from VPC"
+        protocol                 = "TCP"
+        from_port                = local.lb_target_group_status_port
+        to_port                  = local.lb_target_group_status_port
+        type                     = "ingress"
+        source_security_group_id = var.lb_security_group_id
+      }
+      from_vpc_https_port = {
+        description              = "Node HTTPS from VPC"
+        protocol                 = "TCP"
+        from_port                = local.lb_target_group_https_port
+        to_port                  = local.lb_target_group_https_port
+        type                     = "ingress"
+        source_security_group_id = var.lb_security_group_id
+      }
+      bastion_ssh = {
+        description              = "Bastion SSH"
+        protocol                 = "TCP"
+        from_port                = 22
+        to_port                  = 22
+        type                     = "ingress"
+        source_security_group_id = var.bastion_sg_id
+      }
+      ingress_15017 = {
+        description                   = "Cluster API - Istio Webhook namespace.sidecar-injector.istio.io"
+        protocol                      = "TCP"
+        from_port                     = 15017
+        to_port                       = 15017
+        type                          = "ingress"
+        source_cluster_security_group = true
+      }
+      ingress_15012 = {
+        description                   = "Cluster API to nodes ports/protocols"
+        protocol                      = "TCP"
+        from_port                     = 15012
+        to_port                       = 15012
+        type                          = "ingress"
+        source_cluster_security_group = true
+      }
+      ingress_self_all = {
+        description = "Node to node all ports/protocols"
+        protocol    = "-1"
+        from_port   = 0
+        to_port     = 0
+        type        = "ingress"
+        self        = true
+      }
   })
-  # {
-  # ingress_self_all = {
-  #   description = "Node to node all ports/protocols"
-  #   protocol    = "-1"
-  #   from_port   = 0
-  #   to_port     = 0
-  #   type        = "ingress"
-  #   self        = true
-  # },
-  # }
   # node_security_group_enable_recommended_rulesをtrueにすると, 以下のルールが追加される
   # 1. Node to node ingress on ephemeral ports(1025-65535)
   # 2. Cluster API to node 4443/tcp webhook(metrics-server)

@@ -154,13 +154,14 @@ locals {
     ################################################################################
     # User Data
     ################################################################################
-    ami_type = try(ng.ami_type, "AL2_x86_64")
+    ami_type   = try(ng.ami_type, "AL2_x86_64")
+    label_falg = lookup(ng, "node_labels", null) != null ? format("--node-labels=%s", ng.node_labels) : ""
+    taint_flag = lookup(ng, "node_taints", null) != null ? format("--register-with-taints=%s", ng.node_taints) : ""
     # for unmanaged nodes, taints and labels work only with extra-arg, not ASG tags
-    bootstrap_extra_args = format("--kubelet-extra-args%s%s",
+    bootstrap_extra_args = lookup(ng, "node_labels", null) != null || lookup(ng, "node_taints", null) != null ? format("--kubelet-extra-args%s%s",
       lookup(ng, "node_labels", null) != null ? format(" --node-labels=%s", ng.node_labels) : "",
       lookup(ng, "node_taints", null) != null ? format(" --register-with-taints=%s", ng.node_taints) : "",
-    )
-    # bootstrap_extra_args     = "--kubelet-extra-args '--node-labels=${ng.node_labels}  --register-with-taints=${ng.node_taints}'"
+    ) : null
     pre_bootstrap_user_data  = try(ng.pre_bootstrap_user_data, "")
     post_bootstrap_user_data = try(ng.post_bootstrap_user_data, "")
     cloudinit_pre_nodeadm    = try(ng.cloudinit_pre_nodeadm, [])

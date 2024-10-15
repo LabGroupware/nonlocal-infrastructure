@@ -81,7 +81,8 @@ node_groups = [
     #     }
     #   }
     node_labels = "for=app"
-    node_taints = "dedicated=app:NoSchedule"
+    # node_taints = "for=app:NoSchedule"
+    node_taints = ""
   }
 ]
 ########################################
@@ -123,7 +124,7 @@ aws_route53_record_ttl    = 300
 # Route53 Config
 ##############################################
 public_root_domain_name = "state.api.cresplanex.org"
-cluster_private_zone = "eks.local"
+cluster_private_zone    = "eks.local"
 ##############################################
 # Istio
 ##############################################

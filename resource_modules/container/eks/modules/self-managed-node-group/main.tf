@@ -72,6 +72,8 @@ module "user_data" {
   additional_cluster_dns_ips = var.additional_cluster_dns_ips
 
   enable_bootstrap_user_data = true
+  label_falg                 = var.label_falg
+  taint_flag                 = var.taint_flag
   pre_bootstrap_user_data    = var.pre_bootstrap_user_data
   post_bootstrap_user_data   = var.post_bootstrap_user_data
   bootstrap_extra_args       = var.bootstrap_extra_args

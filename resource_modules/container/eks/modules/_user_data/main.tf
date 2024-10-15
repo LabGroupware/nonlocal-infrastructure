@@ -63,6 +63,8 @@ locals {
       cluster_dns_ips = "[${join(", ", formatlist("\"%s\"", local.cluster_dns_ips))}]"
 
       # Optional
+      label_flag               = var.label_falg
+      taint_flag               = var.taint_flag
       bootstrap_extra_args     = var.bootstrap_extra_args
       pre_bootstrap_user_data  = var.pre_bootstrap_user_data
       post_bootstrap_user_data = var.post_bootstrap_user_data

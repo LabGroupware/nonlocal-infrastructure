@@ -62,6 +62,18 @@ variable "additional_cluster_dns_ips" {
   default     = []
 }
 
+variable "label_falg" {
+  description = "String that determines whether to add labels to the node"
+  type        = string
+  default     = ""
+}
+
+variable "taint_flag" {
+  description = "String that determines whether to add taints to the node"
+  type        = string
+  default     = ""
+}
+
 variable "pre_bootstrap_user_data" {
   description = "User data that is injected into the user data script ahead of the EKS bootstrap script. Not used when `ami_type` = `BOTTLEROCKET_*`"
   type        = string

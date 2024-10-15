@@ -481,6 +481,8 @@ module "self_managed_node_group" {
   cluster_auth_base64      = try(time_sleep.this[0].triggers["cluster_certificate_authority_data"], "")
   cluster_service_cidr     = try(time_sleep.this[0].triggers["cluster_service_cidr"], "")
   cluster_ip_family        = var.cluster_ip_family
+  label_falg               = try(each.value.label_falg, var.self_managed_node_group_defaults.label_falg, "")
+  taint_flag               = try(each.value.taint_flag, var.self_managed_node_group_defaults.taint_flag, "")
   pre_bootstrap_user_data  = try(each.value.pre_bootstrap_user_data, var.self_managed_node_group_defaults.pre_bootstrap_user_data, "")
   post_bootstrap_user_data = try(each.value.post_bootstrap_user_data, var.self_managed_node_group_defaults.post_bootstrap_user_data, "")
   bootstrap_extra_args     = try(each.value.bootstrap_extra_args, var.self_managed_node_group_defaults.bootstrap_extra_args, "")

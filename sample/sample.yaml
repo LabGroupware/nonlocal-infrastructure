@@ -10,26 +10,6 @@ spec:
     image: ablankz/myapp:latest
     ports:
     - containerPort: 80
-    volumeMounts:
-    - mountPath: /usr/share/nginx/html
-      name: web-content
-  volumes:
-  - name: web-content
-    configMap:
-      name: web-content-config
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: web-content-config
-data:
-  index.html: |
-    <html>
-    <body>
-    <h1>Hello from Simple App!</h1>
-    </body>
-    </html>
 
 ---
 apiVersion: v1
@@ -37,51 +17,30 @@ kind: Service
 metadata:
   name: simple-app
 spec:
-  type: NodePort
   selector:
     app: simple-app
   ports:
     - protocol: TCP
-      nodePort: 30090
       port: 80
       targetPort: 80
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: simple-app-gateway
-  namespace: default
-spec:
-  selector:
-    istio: ingressgateway  # IstioのIngress Gatewayを指定
-  servers:
-    - port:
-        number: 443
-        protocol: HTTPS
-        name: https
-      tls:
-        mode: SIMPLE
-        credentialName: tls-secret
-      hosts:
-      - "test.state.api.cresplanex.org"
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: simple-app
+  namespace: istio-system
 spec:
   hosts:
-  - "test.state.api.cresplanex.org"
+  - "*"
   gateways:
-  - simple-app-gateway
+  - public-gateway
   http:
   - match:
     - uri:
         exact: /
     route:
     - destination:
-        host: simple-app
+        host: simple-app.default.svc.cluster.local
         port:
           number: 80

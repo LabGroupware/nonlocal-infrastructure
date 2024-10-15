@@ -444,6 +444,7 @@ resource "tls_locally_signed_cert" "signed_domain_cert" {
 
 # Kubernetes Secretに保存
 resource "kubernetes_secret" "istio_tls_secret" {
+  depends_on = [helm_release.istio_base]
   metadata {
     name      = local.cert_secret_name
     namespace = local.istio_namespace
@@ -462,6 +463,7 @@ resource "kubernetes_secret" "istio_tls_secret" {
 ##############################################
 # ConfigMapに証明書更新スクリプトを保存
 resource "kubernetes_config_map_v1" "cert_renewal_script" {
+  depends_on = [helm_release.istio_base]
   metadata {
     name      = "cert-renewal-script"
     namespace = local.istio_namespace
@@ -497,6 +499,7 @@ EOT
 }
 
 resource "kubernetes_cron_job_v1" "cert_renewal_job" {
+  depends_on = [helm_release.istio_base]
   metadata {
     name      = "cert-renewal-job"
     namespace = local.istio_namespace
@@ -673,26 +676,26 @@ resource "helm_release" "istio_ingress" {
 #   ]
 # }
 
-# resource "kubectl_manifest" "istio_target_group_binding_https" {
-#   yaml_body = <<YAML
-# apiVersion: elbv2.k8s.aws/v1beta1
-# kind: TargetGroupBinding
-# metadata:
-#   name: istio-ingress-https
-#   namespace: ${local.istio_namespace}
-# spec:
-#   serviceRef:
-#     name: istio-ingressgateway
-#     port: https
-#   targetGroupARN: ${aws_lb_target_group.https.arn}
-# YAML
+resource "kubectl_manifest" "istio_target_group_binding_https" {
+  yaml_body = <<YAML
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: istio-ingress-https
+  namespace: ${local.istio_namespace}
+spec:
+  serviceRef:
+    name: istio-ingressgateway
+    port: https
+  targetGroupARN: ${aws_lb_target_group.https.arn}
+YAML
 
-#   depends_on = [
-#     module.eks,
-#     helm_release.istio_base,
-#     helm_release.istiod
-#   ]
-# }
+  depends_on = [
+    module.eks,
+    helm_release.istio_base,
+    helm_release.istiod
+  ]
+}
 
 ##############################################
 # Kiali
@@ -756,25 +759,17 @@ resource "helm_release" "kiali-server" {
   ]
 }
 
-resource "kubectl_manifest" "kiali_gateway" {
+resource "kubectl_manifest" "public_gateway" {
   yaml_body = <<YAML
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: kiali-gateway
+  name: public-gateway
   namespace: ${local.istio_namespace}
 spec:
   selector:
     istio: ingressgateway
   servers:
-    # - port:
-    #     number: 80
-    #     protocol: HTTP
-    #     name: http
-    #   hosts:
-    #   - "${var.kiali_virtual_service_host}"
-    #   tls:
-    #     httpsRedirect: true
     - port:
         number: 443
         protocol: HTTPS
@@ -783,8 +778,7 @@ spec:
         mode: SIMPLE
         credentialName: ${local.cert_secret_name}
       hosts:
-        - "${var.kiali_virtual_service_host}"
-        # - "*"
+        - "*"
 YAML
 
   depends_on = [
@@ -804,9 +798,11 @@ metadata:
 spec:
   hosts:
     - "${var.kiali_virtual_service_host}"
+    # - "*.com"
+    # - "*.org"
     #  - "*"
   gateways:
-    - kiali-gateway
+    - public-gateway
   http:
     - match:
       - uri:
@@ -816,9 +812,6 @@ spec:
           host: kiali.istio-system.svc.cluster.local
           port:
             number: 20001
-          # host: simple-app.default.svc.cluster.local
-          # port:
-          #   number: 80
 YAML
 
   depends_on = [

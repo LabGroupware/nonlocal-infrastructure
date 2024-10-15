@@ -20,6 +20,10 @@ asdf install
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 source ~/.bashrc
 ```
+
+### SESメール検証
+今回, Cognitoで使用する`cresplanex.org`のSES検証が完了していることとする.
+
 #### IAMユーザー作成
 > `ClusterAdmin`というロールが既に作成されていることを前提とする.
 > このロールは, `terraform`からassumeが可能である必要がある.

@@ -407,6 +407,14 @@ variable "enable_efs_csi" {
   type        = bool
 }
 
+########################################
+## Helm
+########################################
+variable "helm_dir" {
+  description = "The directory containing the Helm charts to install"
+  type        = string
+}
+
 # --- Istio ---
 ##############################################
 # ACM + Route53
@@ -508,50 +516,58 @@ variable "kiali_virtual_service_host" {
 ##############################################
 # Prometheus + Grafana
 ##############################################
-# variable "enable_prometheus" {
-#   type        = bool
-#   description = "Enable managed Prometheus"
-# }
+variable "enable_prometheus" {
+  type        = bool
+  description = "Enable managed Prometheus"
+}
+variable "prometheus_version" {
+  type        = string
+  description = "The version of Prometheus to install"
+}
+variable "grafana_virtual_service_host" {
+  type        = string
+  description = "The hostname for the Grafana virtual service, used in Istio routing. This host is used to access Grafana dashboards for monitoring metrics."
+}
 
-# variable "grafana_virtual_service_host" {
-#   type        = string
-#   description = "The hostname for the Grafana virtual service, used in Istio routing. This host is used to access Grafana dashboards for monitoring metrics."
-# }
+variable "prometheus_access_type" {
+  type        = string
+  description = "Specifies the access type for managed Prometheus. 'CURRENT_ACCOUNT' limits access to the current AWS account, ensuring isolated and secure access to the monitoring data."
+  default     = "CURRENT_ACCOUNT"
+}
 
-# variable "prometheus_access_type" {
-#   type        = string
-#   description = "Specifies the access type for managed Prometheus. 'CURRENT_ACCOUNT' limits access to the current AWS account, ensuring isolated and secure access to the monitoring data."
-#   default     = "CURRENT_ACCOUNT"
-# }
+variable "grafana_permission_type" {
+  type        = string
+  description = "Defines the permission model for managed Grafana. 'SERVICE_MANAGED' allows AWS to manage permissions, simplifying the setup and management of Grafana."
+  default     = "SERVICE_MANAGED"
+}
 
-# variable "grafana_permission_type" {
-#   type        = string
-#   description = "Defines the permission model for managed Grafana. 'SERVICE_MANAGED' allows AWS to manage permissions, simplifying the setup and management of Grafana."
-#   default     = "SERVICE_MANAGED"
-# }
+variable "grafana_authentication_providers" {
+  type        = list(string)
+  description = "A list of authentication providers for managed Grafana. For example, 'SAML' can be used for integrating with identity providers, ensuring secure and centralized user management."
+  default     = ["SAML"]
+}
 
-# variable "grafana_authentication_providers" {
-#   type        = list(string)
-#   description = "A list of authentication providers for managed Grafana. For example, 'SAML' can be used for integrating with identity providers, ensuring secure and centralized user management."
-#   default     = ["SAML"]
-# }
+variable "grafana_datasources" {
+  type        = list(string)
+  description = "Specifies the data sources that managed Grafana can access. Includes options like 'CLOUDWATCH', 'PROMETHEUS', and 'XRAY', providing a wide range of data for comprehensive monitoring solutions."
+  default     = ["CLOUDWATCH", "PROMETHEUS", "XRAY"]
+}
 
-# variable "grafana_datasources" {
-#   type        = list(string)
-#   description = "Specifies the data sources that managed Grafana can access. Includes options like 'CLOUDWATCH', 'PROMETHEUS', and 'XRAY', providing a wide range of data for comprehensive monitoring solutions."
-#   default     = ["CLOUDWATCH", "PROMETHEUS", "XRAY"]
-# }
+variable "grafana_notification_destinations" {
+  type        = list(string)
+  description = "Lists the notification channels supported by managed Grafana. For instance, 'SNS' allows Grafana to send alerts and notifications through AWS Simple Notification Service."
+  default     = ["SNS"]
+}
 
-# variable "grafana_notification_destinations" {
-#   type        = list(string)
-#   description = "Lists the notification channels supported by managed Grafana. For instance, 'SNS' allows Grafana to send alerts and notifications through AWS Simple Notification Service."
-#   default     = ["SNS"]
-# }
+variable "grafana_subnets" {
+  type        = list(string)
+  description = "The subnets to use for the managed Grafana workspace"
+}
 
-# variable "grafana_subnets" {
-#   type        = list(string)
-#   description = "The subnets to use for the managed Grafana workspace"
-# }
+variable "cognito_user_pool_id" {
+  type        = string
+  description = "The ID of the Cognito user pool"
+}
 
 # ##############################################
 # # Jaeger

@@ -720,35 +720,35 @@ resource "helm_release" "kiali-server" {
     value = "anonymous"
   }
 
-  # set {
-  #   name  = "external_services.tracing.enabled"
-  #   value = true
-  # }
+  set {
+    name  = "external_services.tracing.enabled"
+    value = true
+  }
 
-  # set {
-  #   name  = "external_services.tracing.in_cluster_url"
-  #   value = "http://jaeger-query.jaeger.svc.cluster.local:80"
-  # }
+  set {
+    name  = "external_services.tracing.in_cluster_url"
+    value = "http://jaeger-query.jaeger.svc.cluster.local:80"
+  }
 
-  # set {
-  #   name  = "external_services.tracing.use_grpc"
-  #   value = false
-  # }
+  set {
+    name  = "external_services.tracing.use_grpc"
+    value = false
+  }
 
-  # set {
-  #   name  = "external_services.prometheus.url"
-  #   value = "http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090"
-  # }
+  set {
+    name  = "external_services.prometheus.url"
+    value = "http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090"
+  }
 
-  # set {
-  #   name  = "external_services.grafana.enabled"
-  #   value = true
-  # }
+  set {
+    name  = "external_services.grafana.enabled"
+    value = false
+  }
 
-  # set {
-  #   name  = "external_services.grafana.url"
-  #   value = "http://prometheus-grafana.prometheus.svc.cluster.local:80"
-  # }
+  set {
+    name  = "external_services.grafana.url"
+    value = "http://prometheus-grafana.prometheus.svc.cluster.local:80"
+  }
 
 
   depends_on = [
@@ -798,9 +798,6 @@ metadata:
 spec:
   hosts:
     - "${var.kiali_virtual_service_host}"
-    # - "*.com"
-    # - "*.org"
-    #  - "*"
   gateways:
     - public-gateway
   http:

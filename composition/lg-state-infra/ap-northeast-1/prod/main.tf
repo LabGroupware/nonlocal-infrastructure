@@ -1,12 +1,11 @@
-# TODO: NodeのLabel, Taintの設定修正
-# TODO: Block Device Mountの確認
 # TODO: EFSのPersistent Volumeの設定を追記する
 # TODO: Storage Classの設定を追記する
-# TODO: BasionからEKS Nodeへのアクセスを許可するための設定を追記する
-# (security group + instance profile(iam role))
 # TODO: PrometheusとGrafanaの設定を追記する
 # TODO: SMを使ったSecretの設定を追記する
-# TODO: Load Balancerの設定を追記する
+# TODO: 自己証明書の更新CronJobの有効性を検証する
+# TODO: LBからのヘルスチェック
+# TODO: EFKスタックの設定を追記する
+# TODO: argoCDの設定を追記する
 
 ########################################
 # VPC
@@ -62,6 +61,22 @@ module "bastion" {
   bastion_eip_tags    = local.bastion_eip_tags
 }
 
+module "cognito" {
+  source = "../../../../infrastructure_modules/cognito"
+
+  sms_external_id          = var.sms_external_id
+  has_root_domain_a_record = var.has_root_domain_a_record
+  admin_pool_name          = local.admin_pool_name
+  tags                     = local.cognito_tags
+  ses_domain               = var.ses_domain
+  cognito_from_address     = var.cognito_from_address
+  route53_zone_domain_name = var.route53_zone_domain_name
+  auth_domain              = var.auth_domain
+  admin_domain             = var.admin_domain
+  aws_route53_record_ttl   = var.aws_route53_record_ttl
+  default_admin            = var.default_admin
+}
+
 ########################################
 # EKS
 ########################################
@@ -110,6 +125,9 @@ module "eks" {
   ## EFS CSI Driver ##
   enable_efs_csi = var.enable_efs_csi
 
+  ## Helm ##
+  helm_dir = "${path.module}/helm"
+
   ## Istio ##
   ##############################################
   # ACM + Route53
@@ -121,7 +139,7 @@ module "eks" {
   ##############################################
   # ELB
   ##############################################
-  lb_ingress_internal = false
+  lb_ingress_internal  = false
   lb_security_group_id = module.vpc.public_security_group_id
   lb_subnet_ids        = module.vpc.public_subnets
   proxy_protocol_v2    = false
@@ -139,6 +157,17 @@ module "eks" {
   istio_ingress_max_pods     = var.istio_ingress_max_pods
   kiail_version              = var.kiail_version
   kiali_virtual_service_host = var.kiali_virtual_service_host
-
-  # depends_on = [  ]
+  ##############################################
+  # Prometheus + Grafana
+  ##############################################
+  enable_prometheus                 = var.enable_prometheus
+  prometheus_version                = var.prometheus_version
+  grafana_virtual_service_host      = var.grafana_virtual_service_host
+  prometheus_access_type            = var.prometheus_access_type
+  grafana_permission_type           = var.grafana_permission_type
+  grafana_authentication_providers  = var.grafana_authentication_providers
+  grafana_datasources               = var.grafana_datasources
+  grafana_notification_destinations = var.grafana_notification_destinations
+  grafana_subnets                   = module.vpc.private_subnets
+  cognito_user_pool_id              = module.cognito.cognito_user_pool_id
 }

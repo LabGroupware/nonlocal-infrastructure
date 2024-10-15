@@ -1,0 +1,30 @@
+prometheus:
+    # podMonitorNamespaceSelector:
+    #   any: true
+    podMonitorSelector: {}
+    podMonitorSelectorNilUsesHelmValues: false
+    # ruleNamespaceSelector:
+    #   any: true
+    ruleSelector: {}
+    ruleSelectorNilUsesHelmValues: false
+    # serviceMonitorNamespaceSelector:
+    #   any: true
+    serviceMonitorSelector: {}
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+kubeStateMetrics:
+  enabled: false
+
+grafana:
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+prometheusOperator:
+  enabled: true
+  namespaces: ''
+  denyNamespaces: ''
+  prometheusInstanceNamespaces: ''
+  alertmanagerInstanceNamespaces: ''
+  thanosRulerInstanceNamespaces: ''

@@ -142,6 +142,46 @@ variable "bastion_instance_monitoring" {
   type        = bool
 }
 
+########################################
+# Cognito
+########################################
+variable "has_root_domain_a_record" {
+  type        = bool
+  description = "Whether the root domain has an A record"
+}
+variable "sms_external_id" {
+  type        = string
+  description = "The external ID for the SMS role"
+}
+variable "ses_domain" {
+  type        = string
+  description = "The domain verified in SES"
+}
+
+variable "cognito_from_address" {
+  type        = string
+  description = "The email address to use as the 'from' address in Cognito"
+}
+
+variable "auth_domain" {
+  type        = string
+  description = "The domain name to use for the Cognito user pool"
+}
+
+variable "admin_domain" {
+  type        = string
+  description = "The domain name for the admin"
+}
+
+variable "default_admin" {
+  type = object({
+    username      = string
+    email         = string
+    temp_password = string
+  })
+  description = "The default admin user"
+}
+
 
 ########################################
 # EKS
@@ -553,4 +593,51 @@ variable "kiali_virtual_service_host" {
   type        = string
   description = "The hostname for the Kiali virtual service, a part of Istio's service mesh visualization. It provides insights into the mesh topology and performance."
 }
+
+##############################################
+# Prometheus + Grafana
+##############################################
+variable "enable_prometheus" {
+  type        = bool
+  description = "Enable managed Prometheus"
+}
+variable "prometheus_version" {
+  type        = string
+  description = "The version of Prometheus to install"
+}
+variable "grafana_virtual_service_host" {
+  type        = string
+  description = "The hostname for the Grafana virtual service, used in Istio routing. This host is used to access Grafana dashboards for monitoring metrics."
+}
+
+variable "prometheus_access_type" {
+  type        = string
+  description = "Specifies the access type for managed Prometheus. 'CURRENT_ACCOUNT' limits access to the current AWS account, ensuring isolated and secure access to the monitoring data."
+  default     = "CURRENT_ACCOUNT"
+}
+
+variable "grafana_permission_type" {
+  type        = string
+  description = "Defines the permission model for managed Grafana. 'SERVICE_MANAGED' allows AWS to manage permissions, simplifying the setup and management of Grafana."
+  default     = "SERVICE_MANAGED"
+}
+
+variable "grafana_authentication_providers" {
+  type        = list(string)
+  description = "A list of authentication providers for managed Grafana. For example, 'SAML' can be used for integrating with identity providers, ensuring secure and centralized user management."
+  default     = ["SAML"]
+}
+
+variable "grafana_datasources" {
+  type        = list(string)
+  description = "Specifies the data sources that managed Grafana can access. Includes options like 'CLOUDWATCH', 'PROMETHEUS', and 'XRAY', providing a wide range of data for comprehensive monitoring solutions."
+  default     = ["CLOUDWATCH", "PROMETHEUS", "XRAY"]
+}
+
+variable "grafana_notification_destinations" {
+  type        = list(string)
+  description = "Lists the notification channels supported by managed Grafana. For instance, 'SNS' allows Grafana to send alerts and notifications through AWS Simple Notification Service."
+  default     = ["SNS"]
+}
+
 

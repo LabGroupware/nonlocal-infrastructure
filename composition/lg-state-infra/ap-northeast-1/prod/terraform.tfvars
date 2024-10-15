@@ -38,6 +38,21 @@ bastion_instance_type       = "t3.micro"
 bastion_instance_monitoring = false
 
 ########################################
+# Cognito
+########################################
+sms_external_id          = "815abf0b-a51b-4b97-bf7e-c98b23d920ce" # random UUID
+has_root_domain_a_record = false
+ses_domain               = "cresplanex.org"
+cognito_from_address     = "noreply@cresplanex.org"
+auth_domain              = "auth.admin.cresplanex.org"
+admin_domain             = "admin.cresplanex.org"
+default_admin = {
+  email = "k.hayashi@cresplanex.com"
+  username = "k.hayashi"
+  temp_password = "Password123!"
+}
+
+########################################
 # EKS
 ########################################
 create_eks                             = true
@@ -71,15 +86,17 @@ node_groups = [
     desired_size             = 2
     min_size                 = 1
     max_size                 = 5
-    #   block_device_mappings = {
-    #     device_name = "/dev/xvda"
-    #     ebs = {
-    #       volume_size           = 20
-    #       volume_type           = "gp3"
-    #       delete_on_termination = true
-    #       encrypted             = true
-    #     }
-    #   }
+    block_device_mappings = {
+      # "/dev/xvdb" = {
+      #   device_name = "/dev/xvdb"
+      #   ebs = {
+      #     volume_size           = 20
+      #     volume_type           = "gp3"
+      #     delete_on_termination = true
+      #     encrypted             = true
+      #   }
+      # }
+    }
     node_labels = "for=app"
     # node_taints = "for=app:NoSchedule"
     node_taints = ""
@@ -133,4 +150,14 @@ istio_ingress_min_pods     = 1
 istio_ingress_max_pods     = 5
 kiail_version              = "1.89.7"
 kiali_virtual_service_host = "kiali.state.api.cresplanex.org"
-
+##############################################
+# Prometheus + Grafana
+##############################################
+enable_prometheus                 = true
+prometheus_version                = "65.2.0"
+grafana_virtual_service_host      = "grafana.state.api.cresplanex.org"
+prometheus_access_type            = "CURRENT_ACCOUNT"
+grafana_permission_type           = "SERVICE_MANAGED"
+grafana_authentication_providers  = ["SAML"]
+grafana_datasources               = ["CLOUDWATCH", "PROMETHEUS", "XRAY"]
+grafana_notification_destinations = ["SNS"]

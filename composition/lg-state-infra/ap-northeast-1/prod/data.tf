@@ -54,6 +54,17 @@ locals {
   )
 
   ########################################
+  # Cognito
+  ########################################
+  admin_pool_name = "admin-${var.region_tag[var.region]}-${var.env}-${var.app_name}"
+  cognito_tags = merge(
+    local.tags,
+    tomap({
+      "Pool-Name" = local.admin_pool_name
+    })
+  )
+
+  ########################################
   # EKS
   ########################################
 

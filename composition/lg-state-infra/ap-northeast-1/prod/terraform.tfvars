@@ -47,8 +47,8 @@ cognito_from_address     = "noreply@cresplanex.org"
 auth_domain              = "auth.admin.cresplanex.org"
 admin_domain             = "admin.cresplanex.org"
 default_admin = {
-  email = "k.hayashi@cresplanex.com"
-  username = "k.hayashi"
+  email         = "k.hayashi@cresplanex.com"
+  username      = "k.hayashi"
   temp_password = "Password123!"
 }
 
@@ -153,11 +153,13 @@ kiali_virtual_service_host = "kiali.state.api.cresplanex.org"
 ##############################################
 # Prometheus + Grafana
 ##############################################
-enable_prometheus                 = true
-prometheus_version                = "65.2.0"
-grafana_virtual_service_host      = "grafana.state.api.cresplanex.org"
-prometheus_access_type            = "CURRENT_ACCOUNT"
-grafana_permission_type           = "SERVICE_MANAGED"
-grafana_authentication_providers  = ["SAML"]
-grafana_datasources               = ["CLOUDWATCH", "PROMETHEUS", "XRAY"]
-grafana_notification_destinations = ["SNS"]
+enable_prometheus            = true
+prometheus_version           = "65.2.0"
+grafana_virtual_service_host = "grafana.state.api.cresplanex.org"
+grafana_version              = "8.5.4"
+##############################################
+# Jaeger
+##############################################
+enable_jaeger               = true
+jaeger_version              = "3.3.0"
+jaeger_virtual_service_host = "jaeger.state.api.cresplanex.org"

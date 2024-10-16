@@ -1,6 +1,6 @@
 locals {
   prometheus_repository = "https://prometheus-community.github.io/helm-charts"
-  prometheus_namespace  = "prometheus"
+  metrics_namespace  = "metrics"
 }
 
 ############################################
@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "prometheus_role" {
       test     = "StringEquals"
       variable = "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub"
       values = [
-        "system:serviceaccount:prometheus:managed-prometheus"
+        "system:serviceaccount:${local.metrics_namespace}:managed-prometheus"
       ]
     }
 
@@ -99,7 +99,7 @@ resource "helm_release" "prometheus" {
   name             = "prometheus"
   chart            = "kube-prometheus-stack"
   repository       = local.prometheus_repository
-  namespace        = local.prometheus_namespace
+  namespace        = local.metrics_namespace
   create_namespace = true
 
   version = var.prometheus_version
@@ -154,7 +154,7 @@ resource "helm_release" "kube_state_metrics" {
   name             = "kube-state-metrics"
   repository       = local.prometheus_repository
   chart            = "kube-state-metrics"
-  namespace        = local.prometheus_namespace
+  namespace        = local.metrics_namespace
   create_namespace = true
 
   set {
@@ -176,37 +176,3 @@ resource "helm_release" "kube_state_metrics" {
     module.eks
   ]
 }
-
-# resource "kubectl_manifest" "grafana_virtual_service" {
-
-#   count = var.enable_prometheus ? 1 : 0
-
-#   yaml_body = <<YAML
-# apiVersion: networking.istio.io/v1alpha3
-# kind: VirtualService
-# metadata:
-#   name: grafana
-#   namespace: ${local.istio_namespace}
-# spec:
-#   hosts:
-#   - ${var.grafana_virtual_service_host}
-#   gateways:
-#   - public-gateway
-#   http:
-#   - match:
-#     - uri:
-#         prefix: /
-#     route:
-#     - destination:
-#         host: prometheus-grafana.prometheus.svc.cluster.local
-#         port:
-#           number: 80
-# YAML
-
-#   depends_on = [
-#     module.eks,
-#     helm_release.istio_base,
-#     helm_release.istiod
-#   ]
-
-# }

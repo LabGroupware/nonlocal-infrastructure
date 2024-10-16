@@ -727,27 +727,22 @@ resource "helm_release" "kiali-server" {
 
   set {
     name  = "external_services.tracing.in_cluster_url"
-    value = "http://jaeger-query.jaeger.svc.cluster.local:80"
-  }
-
-  set {
-    name  = "external_services.tracing.use_grpc"
-    value = false
+    value = "http://jaeger-query.${local.jaeger_namespace}.svc.cluster.local:80"
   }
 
   set {
     name  = "external_services.prometheus.url"
-    value = "http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090"
+    value = "http://prometheus-kube-prometheus-prometheus.${local.metrics_namespace}.svc.cluster.local:9090"
   }
 
   set {
     name  = "external_services.grafana.enabled"
-    value = false
+    value = true
   }
 
   set {
     name  = "external_services.grafana.url"
-    value = "http://prometheus-grafana.prometheus.svc.cluster.local:80"
+    value = "http://grafana.${local.metrics_namespace}.svc.cluster.local:80"
   }
 
 

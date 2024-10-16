@@ -1,93 +1,53 @@
-# locals {
-#   jaeger_repository = "https://jaegertracing.github.io/helm-charts"
-# }
+locals {
+  jaeger_repository = "https://jaegertracing.github.io/helm-charts"
+  jaeger_namespace  = "jaeger"
+}
 
-# resource "helm_release" "jaeger" {
+resource "helm_release" "jaeger" {
+  count = var.enable_jaeger ? 1 : 0
 
-#   count = var.enable_jaeger ? 1 : 0
+  name       = "jaeger"
+  repository = local.jaeger_repository
+  chart      = "jaeger"
+  namespace  = local.jaeger_namespace
+  version = var.jaeger_version
+  create_namespace = true
 
-#   name       = "jaeger"
-#   repository = local.jaeger_repository
-#   chart      = "jaeger"
-#   namespace  = "jaeger"
+  depends_on = [
+    module.eks,
+  ]
+}
 
-#   version = "0.69.1"
+resource "kubectl_manifest" "gaeger_virtual_service" {
 
-#   create_namespace = true
+  count = var.enable_jaeger ? 1 : 0
 
-#   depends_on = [
-#     aws_eks_cluster.main,
-#     aws_eks_node_group.main,
-#     kubernetes_config_map.aws-auth
-#   ]
-# }
+  yaml_body = <<YAML
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: jaeger
+  namespace: ${local.istio_namespace}
+spec:
+  hosts:
+  - ${var.jaeger_virtual_service_host}
+  gateways:
+  - public-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: jaeger-query.${local.jaeger_namespace}.svc.cluster.local
+        port:
+          number: 80
+YAML
 
-# resource "kubectl_manifest" "jaeger_gateway" {
+  depends_on = [
+    module.eks,
+    helm_release.istio_base,
+    helm_release.istiod
+  ]
 
-#   count = var.enable_jaeger ? 1 : 0
-
-#   yaml_body = <<YAML
-# apiVersion: networking.istio.io/v1alpha3
-# kind: Gateway
-# metadata:
-#   name: jaeger-query
-#   namespace: jaeger
-# spec:
-#   selector:
-#     istio: ingressgateway
-#   servers:
-#   - port:
-#       number: 80
-#       name: http
-#       protocol: HTTP
-#     hosts:
-#     - ${var.jaeger_virtual_service_host}
-# YAML
-
-#   depends_on = [
-#     aws_eks_cluster.main,
-#     aws_eks_node_group.main,
-#     kubernetes_config_map.aws-auth,
-#     helm_release.istio_base,
-#     helm_release.istiod,
-#     helm_release.jaeger
-#   ]
-
-# }
-
-# resource "kubectl_manifest" "jaeger_virtual_service" {
-
-#   count = var.enable_jaeger ? 1 : 0
-
-#   yaml_body = <<YAML
-# apiVersion: networking.istio.io/v1alpha3
-# kind: VirtualService
-# metadata:
-#   name: jaeger-query
-#   namespace: jaeger
-# spec:
-#   hosts:
-#   - ${var.jaeger_virtual_service_host}
-#   gateways:
-#   - jaeger-query
-#   http:
-#   - match:
-#     - uri:
-#         prefix: /
-#     route:
-#     - destination:
-#         host: jaeger-query
-#         port:
-#           number: 80
-# YAML
-
-#   depends_on = [
-#     aws_eks_cluster.main,
-#     aws_eks_node_group.main,
-#     kubernetes_config_map.aws-auth,
-#     helm_release.istio_base,
-#     helm_release.istiod,
-#     helm_release.jaeger
-#   ]
-
-# }
+}

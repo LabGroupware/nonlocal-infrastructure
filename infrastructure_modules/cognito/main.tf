@@ -83,7 +83,7 @@ resource "aws_cognito_user_pool" "admin_pool" {
   email_configuration {
     email_sending_account = "DEVELOPER"
     from_email_address    = var.cognito_from_address
-    source_arn            = aws_ses_domain_identity.main.arn
+    source_arn            = data.aws_ses_domain_identity.main.arn
   }
 
   # schema {
@@ -260,6 +260,6 @@ resource "aws_cognito_user" "admin_user" {
   message_action = "SUPPRESS"
 
   lifecycle {
-    ignore_changes = ["temporary_password"] # 仮パスワードの変更を無視
+    ignore_changes = [temporary_password, enabled] # 仮パスワードの変更を無視
   }
 }

@@ -160,14 +160,15 @@ module "eks" {
   ##############################################
   # Prometheus + Grafana
   ##############################################
-  enable_prometheus                 = var.enable_prometheus
-  prometheus_version                = var.prometheus_version
-  grafana_virtual_service_host      = var.grafana_virtual_service_host
-  prometheus_access_type            = var.prometheus_access_type
-  grafana_permission_type           = var.grafana_permission_type
-  grafana_authentication_providers  = var.grafana_authentication_providers
-  grafana_datasources               = var.grafana_datasources
-  grafana_notification_destinations = var.grafana_notification_destinations
-  grafana_subnets                   = module.vpc.private_subnets
-  cognito_user_pool_id              = module.cognito.cognito_user_pool_id
+  enable_prometheus            = var.enable_prometheus
+  prometheus_version           = var.prometheus_version
+  grafana_virtual_service_host = var.grafana_virtual_service_host
+  grafana_version              = var.grafana_version
+  cognito_user_pool_id         = module.cognito.cognito_user_pool_id
+  ##############################################
+  # Jaeger
+  ##############################################
+  enable_jaeger               = var.enable_jaeger
+  jaeger_version              = var.jaeger_version
+  jaeger_virtual_service_host = var.jaeger_virtual_service_host
 }

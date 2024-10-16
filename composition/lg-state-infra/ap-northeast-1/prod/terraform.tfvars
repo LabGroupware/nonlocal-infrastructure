@@ -163,3 +163,12 @@ grafana_version              = "8.5.4"
 enable_jaeger               = true
 jaeger_version              = "3.3.0"
 jaeger_virtual_service_host = "jaeger.state.api.cresplanex.org"
+##############################################
+# Node termination handler
+##############################################
+enable_node_termination_handler  = false
+node_termination_handler_version = "0.21.0"
+##############################################
+# Descheduler
+##############################################
+enable_descheduler = false

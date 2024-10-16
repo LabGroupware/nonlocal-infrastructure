@@ -1,11 +1,7 @@
-data "aws_ssoadmin_application_providers" "example" {}
-
-locals {
-  test = data.aws_ssoadmin_application_providers.example.id
+resource "aws_cognito_user_pool" "admin_pool" {
+  name = "admin-pool"
 }
 
-output "aws_ssoadmin_application_providers" {
-  value = [
-    for provider in data.aws_ssoadmin_application_providers.example.application_providers : provider.application_provider_arn
-  ]
+output "cognito_user_pool_endpoint" {
+  value = aws_cognito_user_pool.admin_pool.endpoint
 }

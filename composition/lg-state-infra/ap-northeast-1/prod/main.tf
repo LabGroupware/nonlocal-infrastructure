@@ -157,6 +157,7 @@ module "eks" {
   istio_ingress_max_pods     = var.istio_ingress_max_pods
   kiail_version              = var.kiail_version
   kiali_virtual_service_host = var.kiali_virtual_service_host
+  auth_domain                = var.auth_domain
   ##############################################
   # Prometheus + Grafana
   ##############################################
@@ -165,10 +166,20 @@ module "eks" {
   grafana_virtual_service_host = var.grafana_virtual_service_host
   grafana_version              = var.grafana_version
   cognito_user_pool_id         = module.cognito.cognito_user_pool_id
+  cognito_endpoint             = module.cognito.issuer_url
   ##############################################
   # Jaeger
   ##############################################
   enable_jaeger               = var.enable_jaeger
   jaeger_version              = var.jaeger_version
   jaeger_virtual_service_host = var.jaeger_virtual_service_host
+  ##############################################
+  # Node termination handler
+  ##############################################
+  enable_node_termination_handler  = var.enable_node_termination_handler
+  node_termination_handler_version = var.node_termination_handler_version
+  ##############################################
+  # Descheduler
+  ##############################################
+  enable_descheduler = var.enable_descheduler
 }

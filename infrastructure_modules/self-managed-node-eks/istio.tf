@@ -234,6 +234,8 @@ data "aws_iam_policy_document" "aws_load_balancer_controller_policy" {
     effect = "Allow"
     actions = [
       "iam:CreateServiceLinkedRole",
+      "ec2:CreateSecurityGroup",
+      "ec2:CreateTags",
       "ec2:DescribeAccountAttributes",
       "ec2:DescribeAddresses",
       "ec2:DescribeAvailabilityZones",
@@ -246,6 +248,7 @@ data "aws_iam_policy_document" "aws_load_balancer_controller_policy" {
       "ec2:DescribeTags",
       "ec2:GetCoipPoolUsage",
       "ec2:DescribeCoipPools",
+      "ec2:DeleteSecurityGroup",
       "elasticloadbalancing:DescribeLoadBalancers",
       "elasticloadbalancing:DescribeLoadBalancerAttributes",
       "elasticloadbalancing:DescribeListeners",
@@ -697,11 +700,44 @@ YAML
   ]
 }
 
+##################################################
+# Cognito
+##################################################
+resource "aws_cognito_user_pool_client" "admin_user_pool_kiali" {
+  name         = "kiali-client"
+  user_pool_id = var.cognito_user_pool_id
+  explicit_auth_flows = [
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_ADMIN_USER_PASSWORD_AUTH",
+    "ALLOW_USER_SRP_AUTH",
+  ]
+  generate_secret                      = true
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_scopes                 = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
+  supported_identity_providers         = ["COGNITO"]
+  callback_urls = [
+    "https://${var.kiali_virtual_service_host}/kiali",
+  ]
+}
+
 ##############################################
 # Kiali
 ##############################################
 
-resource "helm_release" "kiali-server" {
+resource "kubernetes_secret" "cognito_secret_kiali" {
+  metadata {
+    name      = "kiali"
+    namespace = local.istio_namespace
+  }
+
+  data = {
+    oidc-secret = base64encode(aws_cognito_user_pool_client.admin_user_pool_kiali.client_secret)
+  }
+}
+
+resource "helm_release" "kiali_server" {
   name             = "kiali-server"
   chart            = "kiali-server"
   repository       = local.kiali_repository
@@ -717,7 +753,47 @@ resource "helm_release" "kiali-server" {
 
   set {
     name  = "auth.strategy"
-    value = "anonymous"
+    value = "openid"
+  }
+
+  set {
+    name  = "auth.openid.client_id"
+    value = aws_cognito_user_pool_client.admin_user_pool_kiali.id
+  }
+
+  set {
+    name  = "auth.openid.issuer_url"
+    value = "https://${var.cognito_endpoint}"
+  }
+
+  set {
+    name  = "auth.openid.username_claim"
+    value = "email"
+  }
+
+  set {
+    name  = "auth.openid.authentication_timeout"
+    value = "120"
+  }
+
+  set {
+    name  = "auth.openid.scopes[0]"
+    value = "openid"
+  }
+
+  set {
+    name  = "auth.openid.scopes[1]"
+    value = "email"
+  }
+
+  set {
+    name  = "auth.openid.scopes[2]"
+    value = "profile"
+  }
+
+  set {
+    name  = "auth.openid.scopes[3]"
+    value = "aws.cognito.signin.user.admin"
   }
 
   set {

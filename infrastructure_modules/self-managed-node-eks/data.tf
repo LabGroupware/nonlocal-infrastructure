@@ -3,6 +3,12 @@ data "aws_caller_identity" "this" {}
 
 locals {
   ########################################
+  ## EFS CSI Driver
+  ########################################
+  efs_security_group_name        = "scg-${var.app_name}-${var.region_tag[var.region]}-${var.env}-efs"
+  efs_security_group_description = "Security group for efs subnets"
+
+  ########################################
   ## EKS IAM Role
   ########################################
   cluster_iam_role_name        = "EKS${var.cluster_name}Role"

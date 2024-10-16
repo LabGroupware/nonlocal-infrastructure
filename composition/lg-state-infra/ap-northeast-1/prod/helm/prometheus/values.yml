@@ -1,19 +1,19 @@
 prometheus:
-    # podMonitorNamespaceSelector:
-    #   any: true
-    podMonitorSelector: {}
-    podMonitorSelectorNilUsesHelmValues: false
-    # ruleNamespaceSelector:
-    #   any: true
-    ruleSelector: {}
-    ruleSelectorNilUsesHelmValues: false
-    # serviceMonitorNamespaceSelector:
-    #   any: true
-    serviceMonitorSelector: {}
-    serviceMonitorSelectorNilUsesHelmValues: false
-
-kubeStateMetrics:
-  enabled: false
+  retention: "1h"  # データの保持期間を1時間に設定
+  retentionSize: "2GB"  # ディスク使用量が2GBを超えると古いデータを削除
+  podMonitorSelector: {}
+  podMonitorSelectorNilUsesHelmValues: false
+  ruleSelector: {}
+  ruleSelectorNilUsesHelmValues: false
+  serviceMonitorSelector: {}
+  serviceMonitorSelectorNilUsesHelmValues: false
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
 
 grafana:
   enabled: false

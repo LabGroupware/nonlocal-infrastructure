@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ebs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce # 1つのノードからのみ書き込みアクセス可能
+  storageClassName: ebs-general # 先ほど作成したStorageClass名を指定
+  resources:
+    requests:
+      storage: 10Gi # 必要なストレージ容量
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ebs-test-pod
+spec:
+  containers:
+    - name: app
+      image: busybox # 軽量なコンテナイメージ
+      command: ["/bin/sh"]
+      args: ["-c", "echo 'hello from EBS' > /mnt/data/output.txt && sleep 3600"] # ファイルを書き込む
+      volumeMounts:
+        - name: ebs-storage
+          mountPath: /mnt/data # ボリュームをマウントするディレクトリ
+  volumes:
+    - name: ebs-storage
+      persistentVolumeClaim:
+        claimName: ebs-pvc # 作成したPVCを指定

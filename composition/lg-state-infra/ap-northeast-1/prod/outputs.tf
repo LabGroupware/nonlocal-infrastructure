@@ -1,4 +1,17 @@
 ########################################
+# Cognito
+########################################
+output "cognito_user_pool_id" {
+  description = "The ID of the Cognito user pool"
+  value       = module.cognito.cognito_user_pool_id
+}
+
+output "cognito_endpoint" {
+  description = "Cognito User Pool Endpoint"
+  value       = module.cognito.issuer_url
+}
+
+########################################
 # VPC
 ########################################
 output "vpc_id" {

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany # 複数ノードからの同時アクセスを許可
+  storageClassName: efs-standard # 作成したStorageClassを指定
+  resources:
+    requests:
+      storage: 5Gi # EFSは自動的にスケーリングするため、このサイズは仮のもの
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: efs-test-pod
+spec:
+  containers:
+  - name: app
+    image: amazonlinux  # Amazon Linuxイメージを使用
+    command: ["/bin/sh"]
+    args: ["-c", "echo 'helloWorld from EFS' > /mnt/efs/input.txt && sleep 3600"]  # ファイルを書き込む
+    volumeMounts:
+    - name: efs-storage
+      mountPath: /mnt/efs  # EFSのマウントポイント
+  volumes:
+  - name: efs-storage
+    persistentVolumeClaim:
+      claimName: efs-pvc  # 作成したPVCを指定

@@ -513,6 +513,11 @@ variable "kiali_virtual_service_host" {
   description = "The hostname for the Kiali virtual service, a part of Istio's service mesh visualization. It provides insights into the mesh topology and performance."
 }
 
+variable "auth_domain" {
+  type        = string
+  description = "The domain name to use for the Cognito user pool"
+}
+
 ##############################################
 # Prometheus + Grafana
 ##############################################
@@ -539,6 +544,11 @@ variable "cognito_user_pool_id" {
   description = "The ID of the Cognito user pool"
 }
 
+variable "cognito_endpoint" {
+  type        = string
+  description = "Cognito User Pool Endpoint"
+}
+
 ##############################################
 # Jaeger
 ##############################################
@@ -557,10 +567,23 @@ variable "jaeger_virtual_service_host" {
   description = "The hostname for the Jaeger virtual service, used in Istio routing. This host is used to access Jaeger for distributed tracing."
 }
 
-# ##############################################
-# # Node termination handler
-# ##############################################
-# variable "node_termination_handler_toggle" {
-#   type        = bool
-#   description = "Enable the node termination handler"
-# }
+##############################################
+# Node termination handler
+##############################################
+variable "enable_node_termination_handler" {
+  type        = bool
+  description = "Enable the node termination handler"
+}
+
+variable "node_termination_handler_version" {
+  type        = string
+  description = "The version of the node termination handler to install"
+}
+##############################################
+# Descheduler
+##############################################
+variable "enable_descheduler" {
+  type        = bool
+  description = "Enable the descheduler"
+}
+

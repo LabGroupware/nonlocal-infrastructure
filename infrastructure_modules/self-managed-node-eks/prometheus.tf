@@ -93,7 +93,6 @@ resource "aws_iam_policy_attachment" "prometheus_policy" {
 ############################################
 
 resource "helm_release" "prometheus" {
-
   count = var.enable_prometheus ? 1 : 0
 
   name             = "prometheus"
@@ -150,29 +149,3 @@ resource "helm_release" "prometheus" {
   ]
 }
 
-resource "helm_release" "kube_state_metrics" {
-  name             = "kube-state-metrics"
-  repository       = local.prometheus_repository
-  chart            = "kube-state-metrics"
-  namespace        = local.metrics_namespace
-  create_namespace = true
-
-  set {
-    name  = "apiService.create"
-    value = "true"
-  }
-
-  set {
-    name  = "metricLabelsAllowlist[0]"
-    value = "nodes=[*]"
-  }
-
-  set {
-    name  = "metricAnnotationsAllowList[0]"
-    value = "nodes=[*]"
-  }
-
-  depends_on = [
-    module.eks
-  ]
-}

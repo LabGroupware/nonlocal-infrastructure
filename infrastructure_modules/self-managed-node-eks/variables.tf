@@ -518,6 +518,11 @@ variable "auth_domain" {
   description = "The domain name to use for the Cognito user pool"
 }
 
+variable "admin_email" {
+  type        = string
+  description = "The email address of the admin user"
+}
+
 ##############################################
 # Prometheus + Grafana
 ##############################################

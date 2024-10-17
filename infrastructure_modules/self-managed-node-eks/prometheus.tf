@@ -1,6 +1,6 @@
 locals {
   prometheus_repository = "https://prometheus-community.github.io/helm-charts"
-  metrics_namespace  = "metrics"
+  metrics_namespace     = "metrics"
 }
 
 ############################################
@@ -121,6 +121,12 @@ resource "helm_release" "prometheus" {
   set {
     name  = "prometheus.prometheusSpec.remoteWrite[0].sigv4.region"
     value = var.region
+  }
+
+  # TODO: 研究時は間隔を変える
+  set {
+    name  = "prometheus.prometheusSpec.scrapeInterval"
+    value = "10m"
   }
 
   set {

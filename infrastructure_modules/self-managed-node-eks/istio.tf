@@ -726,21 +726,6 @@ resource "aws_cognito_user_pool_client" "admin_user_pool_kiali" {
 # Kiali
 ##############################################
 
-resource "kubernetes_secret" "cognito_secret_kiali" {
-  metadata {
-    name      = "kiali"
-    namespace = local.istio_namespace
-  }
-
-  data = {
-    oidc-secret = base64encode(aws_cognito_user_pool_client.admin_user_pool_kiali.client_secret)
-  }
-
-  depends_on = [
-    module.eks,
-  ]
-}
-
 resource "helm_release" "kiali_server" {
   name             = "kiali-server"
   chart            = "kiali-server"
@@ -755,6 +740,11 @@ resource "helm_release" "kiali_server" {
     value = var.kiali_virtual_service_host
   }
 
+  # set {
+  #   name  = "auth.strategy"
+  #   value = "anonymous"
+  # }
+
   set {
     name  = "auth.strategy"
     value = "openid"
@@ -762,22 +752,17 @@ resource "helm_release" "kiali_server" {
 
   set {
     name  = "auth.openid.client_id"
-    value = "${aws_cognito_user_pool_client.admin_user_pool_kiali.id}"
+    value = aws_cognito_user_pool_client.admin_user_pool_kiali.id
+  }
+
+  set {
+    name  = "auth.openid.client_secret"
+    value = aws_cognito_user_pool_client.admin_user_pool_kiali.client_secret
   }
 
   set {
     name  = "auth.openid.issuer_uri"
     value = "https://${var.cognito_endpoint}"
-  }
-
-  set {
-    name  = "auth.openid.username_claim"
-    value = "email"
-  }
-
-  set {
-    name  = "auth.openid.authentication_timeout"
-    value = "120"
   }
 
   set {
@@ -798,6 +783,24 @@ resource "helm_release" "kiali_server" {
   set {
     name  = "auth.openid.scopes[3]"
     value = "aws.cognito.signin.user.admin"
+  }
+
+  # RBACありの挙動が異常なので無効化
+  # TODO: 修正
+  set {
+    name  = "auth.openid.disable_rbac"
+    value = "true"
+  }
+
+  # ログインユーザーは閲覧のみ
+  set {
+    name  = "deployment.view_only_mode"
+    value = "true"
+  }
+
+  set {
+    name  = "auth.openid.username_claim"
+    value = "email"
   }
 
   set {
@@ -830,6 +833,56 @@ resource "helm_release" "kiali_server" {
     value = "http://grafana.${local.metrics_namespace}.svc.cluster.local:80"
   }
 
+  set {
+    name  = "external_services.grafana.auth.type"
+    value = "bearer"
+  }
+
+  set {
+    name  = "external_services.grafana.auth.use_kiali_token"
+    value = true
+  }
+
+  set {
+    name  = "external_services.grafana.dashboards[0].name"
+    value = "kubernetes-cluster-monitoring"
+  }
+
+  set {
+    name  = "external_services.grafana.dashboards[1].name"
+    value = "node-exporter-full"
+  }
+
+  set {
+    name  = "external_services.grafana.dashboards[2].name"
+    value = "prometheus-overview"
+  }
+
+  set {
+    name  = "external_services.grafana.dashboards[3].name"
+    value = "kubernetes-pod"
+  }
+
+  set {
+    name  = "external_services.grafana.dashboards[4].name"
+    value = "node-exporter"
+  }
+
+  set {
+    name  = "external_services.grafana.dashboards[5].name"
+    value = "cluster-monitoring-for-kubernetes"
+  }
+
+  set {
+    name  = "external_services.grafana.dashboards[6].name"
+    value = "k8s-cluster-summary"
+  }
+
+  set {
+    name  = "external_services.grafana.dashboards[7].name"
+    value = "kubernetes-cluster"
+  }
+
 
   depends_on = [
     module.eks,
@@ -838,6 +891,28 @@ resource "helm_release" "kiali_server" {
     kubernetes_secret.istio_tls_secret
   ]
 }
+
+## Auth RBAC
+# resource "kubernetes_cluster_role_binding_v1" "admin_kiali_binding" {
+#   metadata {
+#     name = "kiali-admin-binding"
+#   }
+
+#   role_ref {
+#     api_group = "rbac.authorization.k8s.io"
+#     kind      = "ClusterRole"
+#     name      = "kiali"
+#     # name      = "kiali-viewer" # view_only_mode: falseの場合はkiali
+#   }
+
+#   subject {
+#     kind      = "User"
+#     name      = var.admin_email
+#     api_group = "rbac.authorization.k8s.io"
+#   }
+
+#   depends_on = [helm_release.kiali_server]
+# }
 
 resource "kubectl_manifest" "public_gateway" {
   yaml_body = <<YAML
@@ -886,7 +961,7 @@ spec:
           prefix: /
       route:
       - destination:
-          host: kiali.istio-system.svc.cluster.local
+          host: kiali.${local.istio_namespace}.svc.cluster.local
           port:
             number: 20001
 YAML

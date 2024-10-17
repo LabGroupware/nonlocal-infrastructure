@@ -172,21 +172,7 @@ resource "helm_release" "grafana" {
   version          = var.grafana_version
   create_namespace = true
 
-  # OAuth Config
-  # set {
-  #   name  = "grafana\\.ini.auth.disable_login_form"
-  #   value = "true"
-  # }
-
-  # set {
-  #   name  = "grafana\\.ini.auth.disable_signout_menu"
-  #   value = "true"
-  # }
-
-  # set {
-  #   name  = "grafana\\.ini.auth\\.anonymous.enabled"
-  #   value = "false"
-  # }
+  # Auth Config
   set {
     name  = "grafana\\.ini.auth\\.generic_oauth.enabled"
     value = "true"
@@ -196,21 +182,6 @@ resource "helm_release" "grafana" {
     name  = "grafana\\.ini.auth\\.generic_oauth.client_id"
     value = aws_cognito_user_pool_client.admin_user_pool_grafana[0].id
   }
-
-  # set {
-  #   name  = "grafana\\.ini.auth\\.generic_oauth.client_secret"
-  #   value = aws_cognito_user_pool_client.admin_user_pool_grafana[0].client_secret
-  # }
-
-  # set {
-  #   name  = "env[0].name"
-  #   value = "GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET"
-  # }
-
-  # set {
-  #   name  = "env[0].value"
-  #   value = aws_cognito_user_pool_client.admin_user_pool_grafana[0].client_secret
-  # }
 
   set {
     name  = "env.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET"
@@ -262,19 +233,24 @@ resource "helm_release" "grafana" {
     value = var.region
   }
 
-  set {
-    name  = "adminUser"
-    value = "admin"
-  }
+  # set {
+  #   name  = "adminUser"
+  #   value = "admin"
+  # }
 
-  set {
-    name  = "adminPassword"
-    value = "YOUR_SECURE_PASSWORD"
-  }
+  # set {
+  #   name  = "adminPassword"
+  #   value = "YOUR_SECURE_PASSWORD"
+  # }
 
   set {
     name  = "plugins[0]"
     value = "grafana-amazonprometheus-datasource"
+  }
+
+  set {
+    name  = "plugins[1]"
+    value = "grafana-clock-panel"
   }
 
   set {
@@ -284,12 +260,15 @@ resource "helm_release" "grafana" {
 
   set {
     name  = "datasources.datasources\\.yaml.datasources[0].name"
-    value = "Amazon Managed Prometheus"
+    value = "Prometheus"
   }
 
-    set {
-    name  = "datasources.datasources\\.yaml.datasources[0].type"
-    value = "grafana-amazonprometheus-datasource"
+  # The SigV4 authentication in the core Prometheus data source is deprecated. Please use the Amazon Managed Service for Prometheus data source to authenticate with SigV4.
+  # TODO: 修正
+  set {
+    name = "datasources.datasources\\.yaml.datasources[0].type"
+    # value = "grafana-amazonprometheus-datasource"
+    value = "prometheus"
   }
 
   set {
@@ -317,8 +296,13 @@ resource "helm_release" "grafana" {
     value = var.region
   }
 
+  values = [
+    "${file("${var.helm_dir}/grafana/values.yml")}"
+  ]
+
   depends_on = [
     module.eks,
+    kubernetes_storage_class_v1.block_general,
   ]
 }
 

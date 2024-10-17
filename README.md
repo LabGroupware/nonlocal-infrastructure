@@ -232,7 +232,7 @@ VPC(Bastion)
 ./generate_ssh_config.sh
 ssh -F ./.ssh/config lg_bastion
 ```
-State
+Node
 ``` sh
 ./generate_ssh_config.sh
 ssh -F ./.ssh/config lg_eks_node

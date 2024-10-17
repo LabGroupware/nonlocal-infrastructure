@@ -12,3 +12,6 @@ VirtualServiceを`istio-system`内で作成し, gatewayは`public_gateway`に指
 - `[Kiali](https://kiali.event.api.cresplanex.org)`: Istioメッシュの視覚化
 - `[Grafana](https://grafana.event.api.cresplanex.org)`: メトリクス監視
 - `[Jaeger](https://jaeger.event.api.cresplanex.org)`: 分散トレース監視
+
+### Kiali権限
+[参照先](https://pre-v1-41.kiali.io/documentation/v1.41/configuration/rbac/)

@@ -1,11 +1,26 @@
-# TODO: EFSのPersistent Volumeの設定を追記する
-# TODO: Storage Classの設定を追記する
-# TODO: PrometheusとGrafanaの設定を追記する
 # TODO: SMを使ったSecretの設定を追記する
-# TODO: 自己証明書の更新CronJobの有効性を検証する
 # TODO: LBからのヘルスチェック
-# TODO: EFKスタックの設定を追記する
-# TODO: argoCDの設定を追記する
+# TODO: Grafanaのダッシュボード設定
+# TODO: KialiのGrafanaダッシュボード取り込み
+# TODO: KialiのGrafanaアクセス設定
+# TODO: JaegerOAuth設定
+# TODO: KialiのJaegerアクセス設定
+# TODO: not hurry 自己証明書の更新CronJobの有効性を検証する
+# TODO: not hurry EFKスタックの設定を追記する
+# TODO: not hurry ArgoCDの設定を追記する
+# TODO: not hurry argoCDの設定を追記する
+# TODO: not hurry Deschedulerのテスト+設定
+# TODO: not hurry ArgoRolloutsのテスト+設定
+# TODO: not hurry ChaosMeshのテスト+設定
+# TODO: not hurry NodeTerminationHandlerのテスト+設定
+# TODO: not hurry ユーザーロール関連
+# - AWS Cognito: ユーザーのプール
+# - EKS Access Entry: EKSリソースの操作(+ K8S RBACとの連携)
+# - AWS IAM(+ ID Pool): AWSリソース全体の操作
+# - K8S RBAC: K8Sリソースの操作
+# - Kiail: Kialiダッシュボードの権限管理
+# - Grafana: Grafanaダッシュボードの権限管理
+
 
 ########################################
 # VPC
@@ -158,6 +173,7 @@ module "eks" {
   kiail_version              = var.kiail_version
   kiali_virtual_service_host = var.kiali_virtual_service_host
   auth_domain                = var.auth_domain
+  admin_email                = var.default_admin.email
   ##############################################
   # Prometheus + Grafana
   ##############################################

@@ -32,7 +32,7 @@ resource "aws_eks_addon" "ebs_eks_addon" {
 ##########################################################################################
 resource "kubernetes_storage_class_v1" "block_general" {
   metadata {
-    name = "ebs-general"
+    name = "block-general"
   }
 
   storage_provisioner = "ebs.csi.aws.com"
@@ -54,7 +54,7 @@ resource "kubernetes_storage_class_v1" "block_general" {
 
 resource "kubernetes_storage_class_v1" "block_performance" {
   metadata {
-    name = "ebs-performance"
+    name = "block-performance"
   }
 
   storage_provisioner = "ebs.csi.aws.com"
@@ -77,7 +77,7 @@ resource "kubernetes_storage_class_v1" "block_performance" {
 
 resource "kubernetes_storage_class_v1" "block_backup" {
   metadata {
-    name = "ebs-backup"
+    name = "block-backup"
   }
 
   storage_provisioner = "ebs.csi.aws.com"
@@ -99,7 +99,7 @@ resource "kubernetes_storage_class_v1" "block_backup" {
 
 resource "kubernetes_storage_class_v1" "block_devtest" {
   metadata {
-    name = "ebs-devtest"
+    name = "block-devtest"
   }
 
   storage_provisioner = "ebs.csi.aws.com"

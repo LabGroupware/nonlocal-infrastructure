@@ -251,7 +251,7 @@ resource "aws_cognito_user" "admin_user" {
   # password = var.admin_password
 
   # 既存のメールや電話番号が他のユーザーで使用されていた場合に, ユーザーの上書きを防ぐ
-  force_alias_creation     = false
+  force_alias_creation = false
   # ユーザーの招待時に送信されるメッセージの配信方法（EメールやSMS）を指定
   desired_delivery_mediums = ["EMAIL"]
 
@@ -262,4 +262,31 @@ resource "aws_cognito_user" "admin_user" {
   lifecycle {
     ignore_changes = [temporary_password, enabled] # 仮パスワードの変更を無視
   }
+}
+
+###########################################
+## Group(Minimal)
+## AWS Resourceの操作の許可などは行わない(Cognito Identity Poolとの連携)
+## 単なる外部のIDPとしてのみ利用する
+###########################################
+
+resource "aws_cognito_user_group" "admin" {
+  name         = "Admin"
+  user_pool_id = aws_cognito_user_pool.admin_pool.id
+  description  = "Admin Group"
+}
+
+resource "aws_cognito_user_group" "user" {
+  name         = "User"
+  user_pool_id = aws_cognito_user_pool.admin_pool.id
+  description  = "User Group"
+}
+
+###########################################
+## Cognito User In Group
+###########################################
+resource "aws_cognito_user_in_group" "admin" {
+  user_pool_id = aws_cognito_user_pool.admin_pool.id
+  username     = aws_cognito_user.admin_user.username
+  group_name   = aws_cognito_user_group.admin.name
 }

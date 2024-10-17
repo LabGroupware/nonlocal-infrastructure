@@ -93,7 +93,7 @@ resource "aws_security_group" "efs" {
 resource "aws_efs_mount_target" "efs_standard_mount" {
   file_system_id = aws_efs_file_system.efs_standard.id
 
-  for_each        = toset(var.subnets)
+  for_each        = { for idx, subnet in var.subnets : idx => subnet }
   subnet_id       = each.value
   security_groups = [aws_security_group.efs.id]
 }
@@ -101,7 +101,7 @@ resource "aws_efs_mount_target" "efs_standard_mount" {
 resource "aws_efs_mount_target" "efs_infrequent_access_mount" {
   file_system_id = aws_efs_file_system.efs_infrequent_access.id
 
-  for_each        = toset(var.subnets)
+  for_each        = { for idx, subnet in var.subnets : idx => subnet }
   subnet_id       = each.value
   security_groups = [aws_security_group.efs.id]
 }
@@ -109,7 +109,7 @@ resource "aws_efs_mount_target" "efs_infrequent_access_mount" {
 resource "aws_efs_mount_target" "efs_dev_mount" {
   file_system_id = aws_efs_file_system.efs_dev.id
 
-  for_each        = toset(var.subnets)
+  for_each        = { for idx, subnet in var.subnets : idx => subnet }
   subnet_id       = each.value
   security_groups = [aws_security_group.efs.id]
 }
@@ -117,7 +117,7 @@ resource "aws_efs_mount_target" "efs_dev_mount" {
 resource "aws_efs_mount_target" "efs_secure_mount" {
   file_system_id = aws_efs_file_system.efs_secure.id
 
-  for_each        = toset(var.subnets)
+  for_each        = { for idx, subnet in var.subnets : idx => subnet }
   subnet_id       = each.value
   security_groups = [aws_security_group.efs.id]
 }
@@ -144,6 +144,10 @@ resource "kubernetes_storage_class_v1" "efs_standard" {
   allow_volume_expansion = true
   volume_binding_mode    = "Immediate"
   reclaim_policy         = "Retain"
+
+  depends_on = [
+    module.eks,
+  ]
 }
 
 resource "kubernetes_storage_class_v1" "efs_infrequent_access" {
@@ -165,6 +169,10 @@ resource "kubernetes_storage_class_v1" "efs_infrequent_access" {
   allow_volume_expansion = true
   volume_binding_mode    = "Immediate"
   reclaim_policy         = "Retain"
+
+  depends_on = [
+    module.eks,
+  ]
 }
 resource "kubernetes_storage_class_v1" "efs_dev" {
   metadata {
@@ -185,6 +193,10 @@ resource "kubernetes_storage_class_v1" "efs_dev" {
   allow_volume_expansion = true
   volume_binding_mode    = "Immediate"
   reclaim_policy         = "Delete"
+
+  depends_on = [
+    module.eks,
+  ]
 }
 
 resource "kubernetes_storage_class_v1" "efs_secure" {
@@ -207,4 +219,8 @@ resource "kubernetes_storage_class_v1" "efs_secure" {
   volume_binding_mode    = "Immediate"
   reclaim_policy         = "Retain"
   mount_options          = ["tls"]
+
+  depends_on = [
+    module.eks,
+  ]
 }

@@ -46,6 +46,10 @@ resource "kubernetes_storage_class_v1" "block_general" {
   allow_volume_expansion = true
   volume_binding_mode    = "WaitForFirstConsumer"
   reclaim_policy         = "Delete"
+
+  depends_on = [
+    module.eks,
+  ]
 }
 
 resource "kubernetes_storage_class_v1" "block_performance" {
@@ -65,6 +69,10 @@ resource "kubernetes_storage_class_v1" "block_performance" {
   allow_volume_expansion = true
   volume_binding_mode    = "WaitForFirstConsumer"
   reclaim_policy         = "Retain"
+
+  depends_on = [
+    module.eks,
+  ]
 }
 
 resource "kubernetes_storage_class_v1" "block_backup" {
@@ -83,6 +91,10 @@ resource "kubernetes_storage_class_v1" "block_backup" {
   allow_volume_expansion = true
   volume_binding_mode    = "WaitForFirstConsumer"
   reclaim_policy         = "Delete"
+
+  depends_on = [
+    module.eks,
+  ]
 }
 
 resource "kubernetes_storage_class_v1" "block_devtest" {
@@ -101,4 +113,8 @@ resource "kubernetes_storage_class_v1" "block_devtest" {
   allow_volume_expansion = true
   volume_binding_mode    = "Immediate"
   reclaim_policy         = "Delete"
+
+  depends_on = [
+    module.eks,
+  ]
 }

@@ -173,20 +173,20 @@ resource "helm_release" "grafana" {
   create_namespace = true
 
   # OAuth Config
-  set {
-    name  = "grafana\\.ini.auth.disable_login_form"
-    value = "true"
-  }
+  # set {
+  #   name  = "grafana\\.ini.auth.disable_login_form"
+  #   value = "true"
+  # }
 
-  set {
-    name  = "grafana\\.ini.auth.disable_signout_menu"
-    value = "true"
-  }
+  # set {
+  #   name  = "grafana\\.ini.auth.disable_signout_menu"
+  #   value = "true"
+  # }
 
-  set {
-    name  = "grafana\\.ini.auth\\.anonymous.enabled"
-    value = "false"
-  }
+  # set {
+  #   name  = "grafana\\.ini.auth\\.anonymous.enabled"
+  #   value = "false"
+  # }
   set {
     name  = "grafana\\.ini.auth\\.generic_oauth.enabled"
     value = "true"
@@ -263,11 +263,6 @@ resource "helm_release" "grafana" {
   }
 
   set {
-    name  = "service.type"
-    value = "LoadBalancer"
-  }
-
-  set {
     name  = "adminUser"
     value = "admin"
   }
@@ -277,10 +272,10 @@ resource "helm_release" "grafana" {
     value = "YOUR_SECURE_PASSWORD"
   }
 
-  # set {
-  #   name  = "plugins[0]"
-  #   value = "grafana-amazon-cloudwatch-datasource"
-  # }
+  set {
+    name  = "plugins[0]"
+    value = "grafana-amazonprometheus-datasource"
+  }
 
   set {
     name  = "datasources.datasources\\.yaml.apiVersion"
@@ -292,15 +287,10 @@ resource "helm_release" "grafana" {
     value = "Amazon Managed Prometheus"
   }
 
-  set {
+    set {
     name  = "datasources.datasources\\.yaml.datasources[0].type"
-    value = "prometheus"
+    value = "grafana-amazonprometheus-datasource"
   }
-
-  #   set {
-  #   name  = "datasources.datasources\\.yaml.datasources[0].type"
-  #   value = "grafana-amazonprometheus-datasource"
-  # }
 
   set {
     name  = "datasources.datasources\\.yaml.datasources[0].url"
@@ -360,6 +350,7 @@ YAML
 
   depends_on = [
     module.eks,
+    helm_release.grafana,
     helm_release.istio_base,
     helm_release.istiod
   ]

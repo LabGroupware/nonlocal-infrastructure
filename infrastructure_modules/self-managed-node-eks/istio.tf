@@ -735,6 +735,10 @@ resource "kubernetes_secret" "cognito_secret_kiali" {
   data = {
     oidc-secret = base64encode(aws_cognito_user_pool_client.admin_user_pool_kiali.client_secret)
   }
+
+  depends_on = [
+    module.eks,
+  ]
 }
 
 resource "helm_release" "kiali_server" {
@@ -758,11 +762,11 @@ resource "helm_release" "kiali_server" {
 
   set {
     name  = "auth.openid.client_id"
-    value = aws_cognito_user_pool_client.admin_user_pool_kiali.id
+    value = "${aws_cognito_user_pool_client.admin_user_pool_kiali.id}"
   }
 
   set {
-    name  = "auth.openid.issuer_url"
+    name  = "auth.openid.issuer_uri"
     value = "https://${var.cognito_endpoint}"
   }
 
@@ -799,6 +803,11 @@ resource "helm_release" "kiali_server" {
   set {
     name  = "external_services.tracing.enabled"
     value = true
+  }
+
+  set {
+    name  = "external_services.tracing.use_grpc"
+    value = false
   }
 
   set {
@@ -884,6 +893,7 @@ YAML
 
   depends_on = [
     module.eks,
+    helm_release.kiali_server,
     helm_release.istio_base,
     helm_release.istiod
   ]

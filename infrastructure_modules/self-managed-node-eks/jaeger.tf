@@ -18,7 +18,7 @@ resource "helm_release" "jaeger" {
   ]
 }
 
-resource "kubectl_manifest" "gaeger_virtual_service" {
+resource "kubectl_manifest" "jaeger_virtual_service" {
 
   count = var.enable_jaeger ? 1 : 0
 
@@ -46,6 +46,7 @@ YAML
 
   depends_on = [
     module.eks,
+    helm_release.jaeger,
     helm_release.istio_base,
     helm_release.istiod
   ]

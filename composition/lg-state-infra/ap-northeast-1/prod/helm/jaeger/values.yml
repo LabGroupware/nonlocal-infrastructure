@@ -1,0 +1,4 @@
+provisionDataStore:
+  cassandra: false
+storage:
+  type: memory

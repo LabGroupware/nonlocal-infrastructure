@@ -174,6 +174,20 @@ resource "helm_release" "grafana" {
 
   # Auth Config
   set {
+    name  = "grafana\\.ini.auth\\.anonymous.enabled"
+    value = "true"
+  }
+  set {
+    name  = "grafana\\.ini.security.disable_initial_admin_creation"
+    value = "true"
+  }
+
+  set {
+    name  = "grafana\\.ini.auth.disable_login_form"
+    value = "true"
+  }
+
+  set {
     name  = "grafana\\.ini.auth\\.generic_oauth.enabled"
     value = "true"
   }
@@ -232,16 +246,6 @@ resource "helm_release" "grafana" {
     name  = "grafana\\.ini.auth.sigv4_auth_region"
     value = var.region
   }
-
-  # set {
-  #   name  = "adminUser"
-  #   value = "admin"
-  # }
-
-  # set {
-  #   name  = "adminPassword"
-  #   value = "YOUR_SECURE_PASSWORD"
-  # }
 
   set {
     name  = "plugins[0]"

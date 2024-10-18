@@ -207,7 +207,7 @@ aws s3api delete-bucket --bucket $S3_LG_STATE_MANAGE_BUCKET --region ap-northeas
 ```
 
 #### State研究の開始時
-terraform applyの実行(30分くらいかかる)
+terraform applyの実行(45分くらいかかる)
 ``` sh
 export AWS_DEFAULT_PROFILE=terraform
 aws sts get-caller-identity
@@ -221,10 +221,11 @@ aws eks update-kubeconfig --region ap-northeast-1 --name LGStateApNortheast1Prod
 ```
 
 #### State研究の終了時
-terraform destroyの実行(5分くらいかかる)
+terraform destroyの実行(30分くらいかかる)
 ``` sh
 terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod destroy
 ```
+EBSボリュームの削除
 
 ### Nodeインスタンスでのデバッグについて
 VPC(Bastion)

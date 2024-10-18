@@ -1,6 +1,6 @@
 prometheus:
-  retention: "1h"  # データの保持期間を1時間に設定
-  retentionSize: "2GB"  # ディスク使用量が2GBを超えると古いデータを削除
+  retention: "1h" # データの保持期間を1時間に設定
+  retentionSize: "2GB" # ディスク使用量が2GBを超えると古いデータを削除
   podMonitorSelector: {}
   podMonitorSelectorNilUsesHelmValues: false
   ruleSelector: {}
@@ -14,6 +14,15 @@ prometheus:
     limits:
       memory: "1Gi"
       cpu: "500m"
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: block-general
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 4Gi
 
 grafana:
   enabled: false
@@ -23,8 +32,8 @@ alertmanager:
 
 prometheusOperator:
   enabled: true
-  namespaces: ''
-  denyNamespaces: ''
-  prometheusInstanceNamespaces: ''
-  alertmanagerInstanceNamespaces: ''
-  thanosRulerInstanceNamespaces: ''
+  namespaces: ""
+  denyNamespaces: ""
+  prometheusInstanceNamespaces: ""
+  alertmanagerInstanceNamespaces: ""
+  thanosRulerInstanceNamespaces: ""

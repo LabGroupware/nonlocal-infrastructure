@@ -8,54 +8,68 @@ persistence:
 grafana.ini:
   auth.generic_oauth:
     role_attribute_path: ("cognito:groups" | contains([*], 'Admin') && 'Admin' || contains([*], 'Editor') && 'Editor' || 'Viewer')
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: "kubernetes"
+        orgId: 1
+        folder: "Kubernetes"
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/kubernetes
+      - name: "prometheus"
+        orgId: 1
+        folder: "Prometheus"
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/prometheus
 dashboards:
-  default:
+  kubernetes:
     # Kubernetes Cluster Monitoring
     kubernetes-cluster-monitoring:
       gnetId: 315
       datasource: Prometheus
       revision: 3
-      # folder: "Kubernetes"
     # Node Exporter
     node-exporter-full:
       gnetId: 1860
       datasource: Prometheus
       revision: 37
-      # folder: "Kubernetes"
-    # Prometheus 2.0 Overview
-    prometheus-overview:
-      gnetId: 3662
-      datasource: Prometheus
-      revision: 2
-      # folder: "Prometheus"
     # Kubernetes Pod Monitoring
     kubernetes-pod:
       gnetId: 6417
       datasource: Prometheus
       revision: 1
-      # folder: "Kubernetes"
     # Node Exporter Dashboard EN 20201010-StarsL.cnNode Exporter Dashboard EN 20201010-StarsL.cn
     node-exporter:
       gnetId: 11074
       datasource: Prometheus
       revision: 9
-      # folder: "Kubernetes"
     # Cluster Monitoring for Kubernetes
     cluster-monitoring-for-kubernetes:
       gnetId: 10000
       datasource: Prometheus
       revision: 1
-      # folder: "Kubernetes"
     # K8s Cluster Summary
     k8s-cluster-summary:
       gnetId: 8685
       datasource: Prometheus
       revision: 1
-      # folder: "Kubernetes"
     # Kubernetes Cluster
     kubernetes-cluster:
       gnetId: 7249
       datasource: Prometheus
       revision: 1
-      # folder: "Kubernetes"
-
+  prometheus:
+    # Prometheus 2.0 Overview
+    prometheus-overview:
+      gnetId: 3662
+      datasource: Prometheus
+      revision: 2

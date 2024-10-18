@@ -1,17 +1,21 @@
 locals {
   jaeger_repository = "https://jaegertracing.github.io/helm-charts"
-  jaeger_namespace  = "jaeger"
+  tracing_namespace  = "tracing"
 }
 
 resource "helm_release" "jaeger" {
   count = var.enable_jaeger ? 1 : 0
 
-  name       = "jaeger"
-  repository = local.jaeger_repository
-  chart      = "jaeger"
-  namespace  = local.jaeger_namespace
-  version = var.jaeger_version
+  name             = "jaeger"
+  repository       = local.jaeger_repository
+  chart            = "jaeger"
+  namespace        = local.tracing_namespace
+  version          = var.jaeger_version
   create_namespace = true
+
+  values = [
+    "${file("${var.helm_dir}/jaeger/values.yml")}"
+  ]
 
   depends_on = [
     module.eks,
@@ -39,7 +43,7 @@ spec:
         prefix: /
     route:
     - destination:
-        host: jaeger-query.${local.jaeger_namespace}.svc.cluster.local
+        host: jaeger-query.${local.tracing_namespace}.svc.cluster.local
         port:
           number: 80
 YAML

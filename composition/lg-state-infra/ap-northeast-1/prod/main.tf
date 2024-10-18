@@ -1,8 +1,5 @@
 # TODO: SMを使ったSecretの設定を追記する
 # TODO: LBからのヘルスチェック
-# TODO: Grafanaのダッシュボード設定
-# TODO: KialiのGrafanaダッシュボード取り込み
-# TODO: KialiのGrafanaアクセス設定
 # TODO: JaegerOAuth設定
 # TODO: KialiのJaegerアクセス設定
 # TODO: not hurry 自己証明書の更新CronJobの有効性を検証する
@@ -20,6 +17,7 @@
 # - K8S RBAC: K8Sリソースの操作
 # - Kiail: Kialiダッシュボードの権限管理
 # - Grafana: Grafanaダッシュボードの権限管理
+# TODO: not hurry grafanaの外部アクセス完全無効化
 
 
 ########################################

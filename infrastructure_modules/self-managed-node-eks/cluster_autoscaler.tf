@@ -42,8 +42,7 @@ locals {
 
 # Cluster Autoscaler
 resource "helm_release" "cluster_autoscaler_release" {
-  depends_on = [module.cluster_autoscaler_iam_role, module.eks]
-  name       = "cluster-autoscaler"
+  name = "cluster-autoscaler"
 
   repository = local.cluster_autoscaler_repository
   chart      = "cluster-autoscaler"
@@ -87,6 +86,16 @@ resource "helm_release" "cluster_autoscaler_release" {
   #   name  = "extraArgs.scan-interval"
   #   value = "20s"
   # }
+
+  values = [
+    "${file("${var.helm_dir}/cluster-autoscaler/values.yml")}"
+  ]
+
+  depends_on = [
+    module.cluster_autoscaler_iam_role,
+    module.eks,
+    helm_release.alb_ingress_controller
+  ]
 }
 
 

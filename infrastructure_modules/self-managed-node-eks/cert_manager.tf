@@ -111,8 +111,13 @@ resource "helm_release" "cert_manager" {
     value = aws_iam_role.cert_manager_role.arn
   }
 
+  values = [
+    "${file("${var.helm_dir}/cert-manager/values.yml")}"
+  ]
+
   depends_on = [
-    module.eks
+    module.eks,
+    helm_release.alb_ingress_controller
   ]
 }
 

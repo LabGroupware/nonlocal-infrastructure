@@ -2,10 +2,8 @@
 # TODO: LBからのヘルスチェック
 # TODO: JaegerOAuth設定
 # TODO: KialiのJaegerアクセス設定
-# TODO: not hurry 自己証明書の更新CronJobの有効性を検証する
 # TODO: not hurry EFKスタックの設定を追記する
 # TODO: not hurry ArgoCDの設定を追記する
-# TODO: not hurry argoCDの設定を追記する
 # TODO: not hurry Deschedulerのテスト+設定
 # TODO: not hurry ArgoRolloutsのテスト+設定
 # TODO: not hurry ChaosMeshのテスト+設定
@@ -18,6 +16,12 @@
 # - Kiail: Kialiダッシュボードの権限管理
 # - Grafana: Grafanaダッシュボードの権限管理
 # TODO: not hurry grafanaの外部アクセス完全無効化
+# TODO: not hurry prometheusのストア領域としてThanosを利用する
+# TODO: not hurry prometheusのVerticalScalerの設定
+# TODO: not hurry jaeger BackendのElasitcSearchをSelf Provisioning -> 個別デプロイに変更
+# TODO: not hurry jaeger Queryに対するOAuth2認証の設定
+# - それに伴うKialiからのJaegerへのアクセス設定
+# TODO: not hurry 全管理者OAuth2をIstio Gaetwayへの移行の検討
 
 
 ########################################
@@ -196,4 +200,8 @@ module "eks" {
   # Descheduler
   ##############################################
   enable_descheduler = var.enable_descheduler
+  ##############################################
+  # Secret Manager
+  ##############################################
+  secret_stores_csi_version = var.secret_stores_csi_version
 }

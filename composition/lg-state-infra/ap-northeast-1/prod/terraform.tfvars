@@ -172,3 +172,7 @@ node_termination_handler_version = "0.21.0"
 # Descheduler
 ##############################################
 enable_descheduler = false
+##############################################
+# Secret Manager
+##############################################
+secret_stores_csi_version = "1.4.6"

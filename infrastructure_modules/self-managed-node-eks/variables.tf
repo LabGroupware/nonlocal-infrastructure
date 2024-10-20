@@ -591,4 +591,11 @@ variable "enable_descheduler" {
   type        = bool
   description = "Enable the descheduler"
 }
+##############################################
+# Secret Store CSI Driver
+##############################################
 
+variable "secret_stores_csi_version" {
+  type        = string
+  description = "The version of the Secret Store CSI Driver to install"
+}

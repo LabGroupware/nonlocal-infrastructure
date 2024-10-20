@@ -1,20 +1,13 @@
 prometheus:
-  retention: "1h" # データの保持期間を1時間に設定
-  retentionSize: "2GB" # ディスク使用量が2GBを超えると古いデータを削除
   podMonitorSelector: {}
   podMonitorSelectorNilUsesHelmValues: false
   ruleSelector: {}
   ruleSelectorNilUsesHelmValues: false
   serviceMonitorSelector: {}
   serviceMonitorSelectorNilUsesHelmValues: false
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "250m"
-    limits:
-      memory: "1Gi"
-      cpu: "500m"
   prometheusSpec:
+    retention: "10d"
+    retentionSize: "30GB"
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -22,7 +15,15 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 4Gi
+              storage: 50Gi
+    scrapeInterval: "5m" # 間隔は適度に変える
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "200m"
+      limits:
+        memory: "2Gi"
+        cpu: "500m"
 
 grafana:
   enabled: false

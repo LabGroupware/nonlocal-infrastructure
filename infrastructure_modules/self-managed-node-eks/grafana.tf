@@ -82,78 +82,78 @@ resource "aws_cognito_user_pool_client" "admin_user_pool_grafana" {
 }
 
 ##################################################
-# Role for Grafana
+# Role for Grafana(Managed Prometheusの場合)
 ##################################################
 
-data "aws_iam_policy_document" "grafana_role" {
-  count = var.enable_prometheus ? 1 : 0
+# data "aws_iam_policy_document" "grafana_role" {
+#   count = var.enable_prometheus ? 1 : 0
 
-  version = "2012-10-17"
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect  = "Allow"
+#   version = "2012-10-17"
+#   statement {
+#     actions = ["sts:AssumeRoleWithWebIdentity"]
+#     effect  = "Allow"
 
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub"
-      values = [
-        "system:serviceaccount:${local.metrics_namespace}:grafana"
-      ]
-    }
+#     condition {
+#       test     = "StringEquals"
+#       variable = "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub"
+#       values = [
+#         "system:serviceaccount:${local.metrics_namespace}:grafana"
+#       ]
+#     }
 
-    principals {
-      identifiers = [module.eks.oidc_provider_arn]
-      type        = "Federated"
-    }
-  }
-}
+#     principals {
+#       identifiers = [module.eks.oidc_provider_arn]
+#       type        = "Federated"
+#     }
+#   }
+# }
 
-resource "aws_iam_role" "grafana_role" {
-  count = var.enable_prometheus ? 1 : 0
+# resource "aws_iam_role" "grafana_role" {
+#   count = var.enable_prometheus ? 1 : 0
 
-  assume_role_policy = data.aws_iam_policy_document.grafana_role[0].json
-  name               = format("%s-grafana", var.cluster_name)
-  path               = local.iam_role_path
-}
+#   assume_role_policy = data.aws_iam_policy_document.grafana_role[0].json
+#   name               = format("%s-grafana", var.cluster_name)
+#   path               = local.iam_role_path
+# }
 
-data "aws_iam_policy_document" "grafana_policy" {
-  count   = var.enable_prometheus ? 1 : 0
-  version = "2012-10-17"
+# data "aws_iam_policy_document" "grafana_policy" {
+#   count   = var.enable_prometheus ? 1 : 0
+#   version = "2012-10-17"
 
-  statement {
+#   statement {
 
-    effect = "Allow"
-    actions = [
-      "aps:QueryMetrics",
-      "aps:GetSeries",
-      "aps:GetLabels",
-      "aps:GetMetricMetadata"
-    ]
+#     effect = "Allow"
+#     actions = [
+#       "aps:QueryMetrics",
+#       "aps:GetSeries",
+#       "aps:GetLabels",
+#       "aps:GetMetricMetadata"
+#     ]
 
-    resources = [
-      "*"
-    ]
-  }
-}
+#     resources = [
+#       "*"
+#     ]
+#   }
+# }
 
-resource "aws_iam_policy" "grafana_policy" {
-  count       = var.enable_prometheus ? 1 : 0
-  name        = format("%s-grafana", var.cluster_name)
-  path        = local.iam_role_path
-  description = var.cluster_name
+# resource "aws_iam_policy" "grafana_policy" {
+#   count       = var.enable_prometheus ? 1 : 0
+#   name        = format("%s-grafana", var.cluster_name)
+#   path        = local.iam_role_path
+#   description = var.cluster_name
 
-  policy = data.aws_iam_policy_document.grafana_policy[0].json
-}
+#   policy = data.aws_iam_policy_document.grafana_policy[0].json
+# }
 
-resource "aws_iam_policy_attachment" "grafana_policy" {
-  count = var.enable_prometheus ? 1 : 0
-  name  = format("%s-grafana", var.cluster_name)
-  roles = [
-    aws_iam_role.grafana_role[0].name
-  ]
+# resource "aws_iam_policy_attachment" "grafana_policy" {
+#   count = var.enable_prometheus ? 1 : 0
+#   name  = format("%s-grafana", var.cluster_name)
+#   roles = [
+#     aws_iam_role.grafana_role[0].name
+#   ]
 
-  policy_arn = aws_iam_policy.grafana_policy[0].arn
-}
+#   policy_arn = aws_iam_policy.grafana_policy[0].arn
+# }
 
 ##################################################
 # Helm Grafana
@@ -227,35 +227,35 @@ resource "helm_release" "grafana" {
     value = format("https://%s/", var.grafana_virtual_service_host)
   }
 
-  set {
-    name  = "serviceAccount.name"
-    value = "grafana"
-  }
+  # set {
+  #   name  = "serviceAccount.name"
+  #   value = "grafana"
+  # }
 
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.grafana_role[0].arn
-  }
+  # set {
+  #   name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+  #   value = aws_iam_role.grafana_role[0].arn
+  # }
 
-  set {
-    name  = "grafana\\.ini.auth.sigv4_auth_enabled"
-    value = "true"
-  }
+  # set {
+  #   name  = "grafana\\.ini.auth.sigv4_auth_enabled"
+  #   value = "true"
+  # }
 
-  set {
-    name  = "grafana\\.ini.auth.sigv4_auth_region"
-    value = var.region
-  }
+  # set {
+  #   name  = "grafana\\.ini.auth.sigv4_auth_region"
+  #   value = var.region
+  # }
 
   set {
     name  = "plugins[0]"
-    value = "grafana-amazonprometheus-datasource"
-  }
-
-  set {
-    name  = "plugins[1]"
     value = "grafana-clock-panel"
   }
+
+  # set {
+  #   name  = "plugins[0]"
+  #   value = "grafana-amazonprometheus-datasource"
+  # }
 
   set {
     name  = "datasources.datasources\\.yaml.apiVersion"
@@ -268,16 +268,15 @@ resource "helm_release" "grafana" {
   }
 
   # The SigV4 authentication in the core Prometheus data source is deprecated. Please use the Amazon Managed Service for Prometheus data source to authenticate with SigV4.
-  # TODO: 修正
+  # AWS Managed Prometheusのデータソースを使う場合は, grafana-amazonprometheus-datasourceを利用
   set {
-    name = "datasources.datasources\\.yaml.datasources[0].type"
-    # value = "grafana-amazonprometheus-datasource"
+    name  = "datasources.datasources\\.yaml.datasources[0].type"
     value = "prometheus"
   }
 
   set {
     name  = "datasources.datasources\\.yaml.datasources[0].url"
-    value = format("%s", aws_prometheus_workspace.main[0].prometheus_endpoint) #api/v1/queryは自動で付与される
+    value = "http://prometheus-kube-prometheus-prometheus.${local.metrics_namespace}.svc.cluster.local:9090" #api/v1/queryは自動で付与される
   }
 
   set {
@@ -285,20 +284,32 @@ resource "helm_release" "grafana" {
     value = "proxy"
   }
 
-  set {
-    name  = "datasources.datasources\\.yaml.datasources[0].jsonData.sigV4Auth"
-    value = "true"
-  }
 
-  set {
-    name  = "datasources.datasources\\.yaml.datasources[0].jsonData.sigV4AuthType"
-    value = "default"
-  }
+  # AWS Managed Prometheusのデータソースを使う場合は, 以下の設定を利用
+  # set {
+  #   name  = "datasources.datasources\\.yaml.datasources[0].url"
+  #   value = format("%s", aws_prometheus_workspace.main[0].prometheus_endpoint) #api/v1/queryは自動で付与される
+  # }
 
-  set {
-    name  = "datasources.datasources\\.yaml.datasources[0].jsonData.sigV4Region"
-    value = var.region
-  }
+  # set {
+  #   name  = "datasources.datasources\\.yaml.datasources[0].access"
+  #   value = "proxy"
+  # }
+
+  # set {
+  #   name  = "datasources.datasources\\.yaml.datasources[0].jsonData.sigV4Auth"
+  #   value = "true"
+  # }
+
+  # set {
+  #   name  = "datasources.datasources\\.yaml.datasources[0].jsonData.sigV4AuthType"
+  #   value = "default"
+  # }
+
+  # set {
+  #   name  = "datasources.datasources\\.yaml.datasources[0].jsonData.sigV4Region"
+  #   value = var.region
+  # }
 
   values = [
     "${file("${var.helm_dir}/grafana/values.yml")}"
@@ -307,6 +318,7 @@ resource "helm_release" "grafana" {
   depends_on = [
     module.eks,
     kubernetes_storage_class_v1.block_general,
+    helm_release.alb_ingress_controller,
   ]
 }
 

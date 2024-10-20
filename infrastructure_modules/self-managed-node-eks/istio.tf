@@ -351,8 +351,11 @@ resource "helm_release" "alb_ingress_controller" {
   set {
     name  = "vpcId"
     value = var.vpc_id
-
   }
+
+  values = [
+    "${file("${var.helm_dir}/aws-load-balancer-controller/values.yml")}"
+  ]
 
   depends_on = [
     module.eks
@@ -386,6 +389,38 @@ resource "helm_release" "istiod" {
   create_namespace = true
 
   version = var.istio_version
+
+  set {
+    name  = "autoscaleEnabled"
+    value = "true"
+  }
+
+  set {
+    name  = "autoscaleMin"
+    value = 1
+  }
+
+  set {
+    name  = "autoscaleMax"
+    value = 5
+  }
+
+  set {
+    name  = "resources.requests.cpu"
+    value = "500m"
+  }
+
+  set {
+    name  = "resources.requests.memory"
+    value = "2Gi"
+  }
+
+  set {
+    name  = "cpu.targetAverageUtilization"
+    value = 75
+  }
+
+
 
   depends_on = [
     module.eks,
@@ -538,28 +573,6 @@ resource "helm_release" "istio_ingress" {
     helm_release.istiod
   ]
 }
-
-
-# resource "kubectl_manifest" "istio_target_group_binding_http" {
-#   yaml_body = <<YAML
-# apiVersion: elbv2.k8s.aws/v1beta1
-# kind: TargetGroupBinding
-# metadata:
-#   name: istio-ingress
-#   namespace: ${local.istio_namespace}
-# spec:
-#   serviceRef:
-#     name: istio-ingressgateway
-#     port: http2
-#   targetGroupARN: ${aws_lb_target_group.http.arn}
-# YAML
-
-#   depends_on = [
-#     module.eks,
-#     helm_release.istio_base,
-#     helm_release.istiod
-#   ]
-# }
 
 resource "kubectl_manifest" "istio_target_group_binding_https" {
   yaml_body = <<YAML
@@ -791,6 +804,10 @@ resource "helm_release" "kiali_server" {
     value = "kubernetes-cluster"
   }
 
+  values = [
+    "${file("${var.helm_dir}/kiali/values.yml")}"
+  ]
+
 
   depends_on = [
     module.eks,
@@ -800,26 +817,26 @@ resource "helm_release" "kiali_server" {
 }
 
 # Auth RBAC
-resource "kubernetes_cluster_role_binding_v1" "admin_kiali_binding" {
-  metadata {
-    name = "kiali-admin-binding"
-  }
+# resource "kubernetes_cluster_role_binding_v1" "admin_kiali_binding" {
+#   metadata {
+#     name = "kiali-admin-binding"
+#   }
 
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "kiali"
-    # name      = "kiali-viewer" # view_only_mode: falseの場合はkiali
-  }
+#   role_ref {
+#     api_group = "rbac.authorization.k8s.io"
+#     kind      = "ClusterRole"
+#     name      = "kiali"
+#     # name      = "kiali-viewer" # view_only_mode: falseの場合はkiali
+#   }
 
-  subject {
-    kind      = "User"
-    name      = var.admin_email
-    api_group = "rbac.authorization.k8s.io"
-  }
+#   subject {
+#     kind      = "User"
+#     name      = var.admin_email
+#     api_group = "rbac.authorization.k8s.io"
+#   }
 
-  depends_on = [helm_release.kiali_server]
-}
+#   depends_on = [helm_release.kiali_server]
+# }
 
 resource "kubectl_manifest" "public_gateway" {
   yaml_body = <<YAML

@@ -1,28 +1,4 @@
-# TODO: SMを使ったSecretの設定を追記する
 # TODO: LBからのヘルスチェック
-# TODO: JaegerOAuth設定
-# TODO: KialiのJaegerアクセス設定
-# TODO: not hurry EFKスタックの設定を追記する
-# TODO: not hurry ArgoCDの設定を追記する
-# TODO: not hurry Deschedulerのテスト+設定
-# TODO: not hurry ArgoRolloutsのテスト+設定
-# TODO: not hurry ChaosMeshのテスト+設定
-# TODO: not hurry NodeTerminationHandlerのテスト+設定
-# TODO: not hurry ユーザーロール関連
-# - AWS Cognito: ユーザーのプール
-# - EKS Access Entry: EKSリソースの操作(+ K8S RBACとの連携)
-# - AWS IAM(+ ID Pool): AWSリソース全体の操作
-# - K8S RBAC: K8Sリソースの操作
-# - Kiail: Kialiダッシュボードの権限管理
-# - Grafana: Grafanaダッシュボードの権限管理
-# TODO: not hurry grafanaの外部アクセス完全無効化
-# TODO: not hurry prometheusのストア領域としてThanosを利用する
-# TODO: not hurry prometheusのVerticalScalerの設定
-# TODO: not hurry jaeger BackendのElasitcSearchをSelf Provisioning -> 個別デプロイに変更
-# TODO: not hurry jaeger Queryに対するOAuth2認証の設定
-# - それに伴うKialiからのJaegerへのアクセス設定
-# TODO: not hurry 全管理者OAuth2をIstio Gaetwayへの移行の検討
-
 
 ########################################
 # VPC

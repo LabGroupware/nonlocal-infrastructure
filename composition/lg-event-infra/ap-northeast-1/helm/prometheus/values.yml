@@ -1,0 +1,40 @@
+prometheus:
+  podMonitorSelector: {}
+  podMonitorSelectorNilUsesHelmValues: false
+  ruleSelector: {}
+  ruleSelectorNilUsesHelmValues: false
+  serviceMonitorSelector: {}
+  serviceMonitorSelectorNilUsesHelmValues: false
+  prometheusSpec:
+    retention: "10d"
+    retentionSize: "30GB"
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: block-general
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+    scrapeInterval: "5m" # 間隔は適度に変える
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "200m"
+      limits:
+        memory: "2Gi"
+        cpu: "500m"
+
+grafana:
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+prometheusOperator:
+  enabled: true
+  namespaces: ""
+  denyNamespaces: ""
+  prometheusInstanceNamespaces: ""
+  alertmanagerInstanceNamespaces: ""
+  thanosRulerInstanceNamespaces: ""

@@ -1,0 +1,130 @@
+provisionDataStore:
+  cassandra: false
+  elasticsearch: true
+  kafka: false
+# Jaeger Agent, Collector, Query components, and Storage(Elasticsearch, Cassandra, Kafka) を個別(別Pod)でデプロイする場合は false に設定
+allInOne:
+  enabled: false
+
+storage:
+  type: elasticsearch
+  elasticsearch:
+    scheme: http
+    host: elasticsearch
+    port: 9200
+
+# # For configurable values of the elasticsearch if provisioned, please see:
+# # https://github.com/bitnami/charts/tree/main/bitnami/elasticsearch
+elasticsearch:
+  fullnameOverride: "elasticsearch"
+  masterOnly: false
+  master:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      storageClass: "block-general"
+      accessModes: ["ReadWriteOnce"]
+      size: 50Gi
+  data:
+    replicaCount: 0
+  coordinating:
+    replicaCount: 0
+  ingest:
+    replicaCount: 0
+
+# メッセージングシステムから受け取ったデータを指定されたバックエンドストレージ（ElasticsearchやCassandraなど）に書き込むためのコンポーネント
+# 現段階ではKafkaを利用しないため, 不要
+ingester:
+  enabled: false
+# トレースデータの依存関係の分析に使用されるコンポーネント
+# Jaegerに保存されたトレースデータからサービス間の依存関係を解析し, その結果を保存(トレースデータのバッチ処理+可視化のための依存関係データ生成)
+# バッチ処理による大規模なトレース依存関係の分析が必要な場合に有効化
+spark:
+  enabled: false
+
+# Elasticsearchバックエンドを使用している場合に, 古いインデックスを削除するためのジョブを実行するコンポーネント
+# 長期間のデータを保持する必要がない場合に, ストレージの節約と管理が可能
+# すぐにサーバー自体を削除するため, このコンポーネントは不要
+esIndexCleaner:
+  enabled: false
+
+# Elasticsearchのインデックスをローテーションするためのジョブを実行するコンポーネント
+# インデックスのサイズが大きくなりすぎるとパフォーマンスが低下するため, 一定のサイズや一定期間の経過などに基づいてロールオーバーによって新しいインデックスを作成し, 古いインデックスをアーカイブ
+# すぐにサーバー自体を削除するため, このコンポーネントは不要
+esRollover:
+  enabled: false
+
+# Elasticsearchに保存されたトレースデータを特定の期間に絞って検索できるようにするためのコンポーネント
+# 過去7日間のデータのみを対象にするなど, 指定した期間内のデータを効率的にクエリできるようにする設定可能.
+# すぐにサーバー自体を削除するため, このコンポーネントは不要
+esLookback:
+  enabled: false
+
+# Jaegerのデモアプリケーション
+hotrod:
+  enabled: false
+
+# Array with extra yaml objects to install alongside the chart. Values are evaluated as a template.
+extraObjects: []
+
+# アプリケーションから送信されたトレースデータ（スパン）を受け取り, Collectorに転送する軽量のデーモン
+# 各ノードで動作し, 分散トレースデータを集中的に管理
+# アプリケーションから送信されるトレースデータを集約し, Collectorに送信
+# 主にUDPを介してトレースデータを受信
+# 各アプリケーションはAgentに対してトレースを送信し, AgentはCollectorにトラフィックを負荷分散させる
+# agent:
+#   resources:
+#     requests:
+#       cpu: 64m
+#       memory: 64Mi
+#     limits:
+#       cpu: 128m
+#       memory: 512Mi
+# Agentや直接アプリケーションから送信されるトレースデータを受け取り, ストレージ（Elasticsearch, Cassandra, Kafkaなど）に保存するコンポーネント
+# アプリケーションが生成する大量のトレースデータを効果的に処理し, 保存する重要な役割を担う
+# Agentや直接送信されるトレースデータを受信
+# 受信プロトコルには, gRPC, HTTP, Thriftなどが使用可能
+# 受け取ったトレースデータをElasticsearch, Cassandra, Kafkaなどのバックエンドストレージに保存
+# データを効率的に処理するために, バッチ処理を行い, ストレージへの負荷を軽減
+# collector:
+#   autoscaling:
+#     enabled: true
+#     minReplicas: 1
+#     maxReplicas: 5
+#     targetCPUUtilizationPercentage: 80
+#   resources:
+#     requests:
+#       cpu: 100m
+#       memory: 256Mi
+#     limits:
+#       cpu: 300m
+#       memory: 512Mi
+# ユーザーがJaegerのトレースデータを検索・可視化するためのWebインターフェース
+# トレースデータベースに対してクエリを実行し, ユーザーのリクエストに応じて結果を返す
+# Web UIだけでなく, 他のアプリケーションやツールがトレースデータにアクセスできるようにAPIを提供
+# query:
+#   oAuthSidecar:
+#     enabled: true
+#     resources:
+#       requests:
+#         cpu: 100m
+#         memory: 64Mi
+#       limits:
+#         cpu: 200m
+#         memory: 256Mi
+#   agentSidecar:
+#     enabled: true
+#     resources:
+#       requests:
+#         cpu: 64m
+#         memory: 64Mi
+#       limits:
+#         cpu: 128m
+#         memory: 256Mi
+#   resources:
+#     requests:
+#       cpu: 128m
+#       memory: 128Mi
+#     limits:
+#       cpu: 384m
+#       memory: 512Mi

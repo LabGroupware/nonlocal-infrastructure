@@ -1,4 +1,17 @@
 ########################################
+# Cognito
+########################################
+output "cognito_user_pool_id" {
+  description = "The ID of the Cognito user pool"
+  value       = module.cognito.cognito_user_pool_id
+}
+
+output "cognito_endpoint" {
+  description = "Cognito User Pool Endpoint"
+  value       = module.cognito.issuer_url
+}
+
+########################################
 # VPC
 ########################################
 output "vpc_id" {
@@ -177,6 +190,18 @@ output "database_security_group_name" {
   value = module.vpc.database_security_group_name
 }
 
+########################################
+# Bastion
+########################################
+output "bastion_instance_public_instance_id" {
+  description = "Public EC2 Instance ID"
+  value       = module.bastion.bastion_instance_public_instance_id
+}
+
+output "bastion_instance_eip" {
+  description = "Elastic IP associated to the Bastion Host"
+  value       = module.bastion.bastion_instance_eip
+}
 
 ########################################
 # EKS
@@ -212,6 +237,11 @@ output "eks_cluster_oidc_issuer_url" {
   value       = module.eks.cluster_oidc_issuer_url
 }
 
+output "eks_cluster_oidc_provider_arn" {
+  description = "The ARN of the OIDC Provider"
+  value       = module.eks.cluster_oidc_provider_arn
+}
+
 output "eks_cluster_version" {
   description = "The Kubernetes server version for the EKS cluster."
   value       = module.eks.cluster_version
@@ -242,17 +272,17 @@ output "eks_node_security_group_id" {
   value       = module.eks.node_security_group_id
 }
 
-################################################################################
-# IRSA
-################################################################################
-output "eks_oidc_provider" {
-  description = "The OpenID Connect identity provider (issuer URL without leading `https://`)"
-  value       = module.eks.oidc_provider
-}
-output "eks_oidc_provider_arn" {
-  description = "The ARN of the OIDC Provider if `enable_irsa = true`"
-  value       = module.eks.oidc_provider_arn
-}
+# ################################################################################
+# # IRSA
+# ################################################################################
+# output "eks_oidc_provider" {
+#   description = "The OpenID Connect identity provider (issuer URL without leading `https://`)"
+#   value       = module.eks.oidc_provider
+# }
+# output "eks_oidc_provider_arn" {
+#   description = "The ARN of the OIDC Provider if `enable_irsa = true`"
+#   value       = module.eks.oidc_provider_arn
+# }
 
 ################################################################################
 # IAM Role
@@ -296,97 +326,92 @@ output "eks_self_managed_node_groups_autoscaling_group_names" {
 ################################################################################
 # Additional
 ################################################################################
-output "eks_aws_auth_configmap_yaml" {
-  description = "A kubernetes configuration to authenticate to this EKS cluster."
-  value       = module.eks.aws_auth_configmap_yaml
-}
-
 ## IRSA ##
 ## cluster autoscale iam role ##
-output "eks_cluster_autoscaler_iam_assumable_role_arn" {
-  description = "ARN of IAM role"
-  value       = module.eks.cluster_autoscaler_iam_assumable_role_arn
-}
+# output "eks_cluster_autoscaler_iam_assumable_role_arn" {
+#   description = "ARN of IAM role"
+#   value       = module.eks.cluster_autoscaler_iam_assumable_role_arn
+# }
 
-output "eks_cluster_autoscaler_iam_assumable_role_name" {
-  description = "Name of IAM role"
-  value       = module.eks.cluster_autoscaler_iam_assumable_role_name
-}
+# output "eks_cluster_autoscaler_iam_assumable_role_name" {
+#   description = "Name of IAM role"
+#   value       = module.eks.cluster_autoscaler_iam_assumable_role_name
+# }
 
-output "eks_cluster_autoscaler_iam_assumable_role_path" {
-  description = "Path of IAM role"
-  value       = module.eks.cluster_autoscaler_iam_assumable_role_path
-}
+# output "eks_cluster_autoscaler_iam_assumable_role_path" {
+#   description = "Path of IAM role"
+#   value       = module.eks.cluster_autoscaler_iam_assumable_role_path
+# }
 
-## cluster autoscale iam policy ##
-output "eks_cluster_autoscaler_iam_policy_id" {
-  description = "The policy's ID."
-  value       = module.eks.cluster_autoscaler_iam_policy_id
-}
+# ## cluster autoscale iam policy ##
+# output "eks_cluster_autoscaler_iam_policy_id" {
+#   description = "The policy's ID."
+#   value       = module.eks.cluster_autoscaler_iam_policy_id
+# }
 
-output "eks_cluster_autoscaler_iam_policy_arn" {
-  description = "The ARN assigned by AWS to this policy."
-  value       = module.eks.cluster_autoscaler_iam_policy_arn
-}
+# output "eks_cluster_autoscaler_iam_policy_arn" {
+#   description = "The ARN assigned by AWS to this policy."
+#   value       = module.eks.cluster_autoscaler_iam_policy_arn
+# }
 
-output "eks_cluster_autoscaler_iam_policy_description" {
-  description = "The description of the policy."
-  value       = module.eks.cluster_autoscaler_iam_policy_description
-}
+# output "eks_cluster_autoscaler_iam_policy_description" {
+#   description = "The description of the policy."
+#   value       = module.eks.cluster_autoscaler_iam_policy_description
+# }
 
-output "eks_cluster_autoscaler_iam_policy_name" {
-  description = "The name of the policy."
-  value       = module.eks.cluster_autoscaler_iam_policy_name
-}
+# output "eks_cluster_autoscaler_iam_policy_name" {
+#   description = "The name of the policy."
+#   value       = module.eks.cluster_autoscaler_iam_policy_name
+# }
 
-output "eks_cluster_autoscaler_iam_policy_path" {
-  description = "The path of the policy in IAM."
-  value       = module.eks.cluster_autoscaler_iam_policy_path
-}
+# output "eks_cluster_autoscaler_iam_policy_path" {
+#   description = "The path of the policy in IAM."
+#   value       = module.eks.cluster_autoscaler_iam_policy_path
+# }
 
-output "eks_cluster_autoscaler_iam_policy" {
-  description = "The policy document."
-  value       = module.eks.cluster_autoscaler_iam_policy
-}
+# output "eks_cluster_autoscaler_iam_policy" {
+#   description = "The policy document."
+#   value       = module.eks.cluster_autoscaler_iam_policy
+# }
 
-########################################
-# EFS MOUNT TARGET SG
-########################################
-output "efs_mount_target_security_group_id" {
-  value = module.eks.efs_mount_target_security_group_id
-}
+# ########################################
+# # EFS MOUNT TARGET SG
+# ########################################
+# output "efs_mount_target_security_group_id" {
+#   value = module.eks.efs_mount_target_security_group_id
+# }
 
-output "efs_mount_target_security_group_vpc_id" {
-  value = module.eks.efs_mount_target_security_group_vpc_id
-}
+# output "efs_mount_target_security_group_vpc_id" {
+#   value = module.eks.efs_mount_target_security_group_vpc_id
+# }
 
-output "efs_mount_target_security_group_name" {
-  value = module.eks.efs_mount_target_security_group_name
-}
+# output "efs_mount_target_security_group_name" {
+#   value = module.eks.efs_mount_target_security_group_name
+# }
 
-########################################
-# EFS
-########################################
-output "efs_id" {
-  value = module.eks.efs_id
-}
+# ########################################
+# # EFS
+# ########################################
+# output "efs_id" {
+#   value = module.eks.efs_id
+# }
 
-output "efs_arn" {
-  value = module.eks.efs_arn
-}
+# output "efs_arn" {
+#   value = module.eks.efs_arn
+# }
 
-output "efs_dns_name" {
-  value = module.eks.efs_dns_name
-}
+# output "efs_dns_name" {
+#   value = module.eks.efs_dns_name
+# }
 
-output "efs_mount_target_id" {
-  value = module.eks.efs_mount_target_id
-}
+# output "efs_mount_target_id" {
+#   value = module.eks.efs_mount_target_id
+# }
 
-output "efs_mount_target_dns_name" {
-  value = module.eks.efs_mount_target_dns_name
-}
+# output "efs_mount_target_dns_name" {
+#   value = module.eks.efs_mount_target_dns_name
+# }
 
-output "efs_mount_target_network_interface_id" {
-  value = module.eks.efs_mount_target_network_interface_id
-}
+# output "efs_mount_target_network_interface_id" {
+#   value = module.eks.efs_mount_target_network_interface_id
+# }

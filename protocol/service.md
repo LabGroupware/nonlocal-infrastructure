@@ -1,7 +1,7 @@
 ## Service
 
 ### 公開したいサービス
-VirtualServiceを`istio-system`内で作成し, gatewayは`public_gateway`に指定する.
+VirtualServiceを`istio-system`内で作成し, gatewayは`public-gateway`に指定する.
 
 ### 管理者用サービス(State)
 - `[Kiali](https://kiali.state.api.cresplanex.org)`: Istioメッシュの視覚化

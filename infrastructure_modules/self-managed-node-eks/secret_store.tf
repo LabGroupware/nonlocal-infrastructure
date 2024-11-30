@@ -1,6 +1,5 @@
 locals {
   secrets_store_csi_driver_repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
-  secret_store_namespace              = "secret-store"
 }
 
 ############################################

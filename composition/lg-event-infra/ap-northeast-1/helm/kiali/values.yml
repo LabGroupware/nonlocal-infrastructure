@@ -1,0 +1,8 @@
+deployment:
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "40m"
+    limits:
+      memory: "1Gi"
+      cpu: "100m"

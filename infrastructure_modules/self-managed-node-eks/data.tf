@@ -244,7 +244,14 @@ locals {
       auto_scaler_policy = "arn:aws:iam::aws:policy/AutoScalingFullAccess"
     })
     create_iam_role_policy     = true
-    iam_role_policy_statements = try(ng.iam_role_policy_statements, [])
+    iam_role_policy_statements = try(ng.iam_role_policy_statements, [
+      # ECRための権限
+      {
+        effect    = "Allow"
+        actions   = ["ecr:InitiateLayerUpload", "ecr:UploadLayerPart", "ecr:CompleteLayerUpload", "ecr:PutImage", "secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
+        resources = ["*"]
+      }
+    ])
 
     ################################################################################
     # Access Entry

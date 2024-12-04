@@ -534,6 +534,10 @@ variable "prometheus_version" {
   type        = string
   description = "The version of Prometheus to install"
 }
+variable "prometheus_virtual_service_host" {
+  type        = string
+  description = "The hostname for the Prometheus virtual service, used in Istio routing. This host is used to access Prometheus for monitoring metrics."
+}
 variable "grafana_virtual_service_host" {
   type        = string
   description = "The hostname for the Grafana virtual service, used in Istio routing. This host is used to access Grafana dashboards for monitoring metrics."

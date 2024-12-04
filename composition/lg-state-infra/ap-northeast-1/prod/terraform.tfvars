@@ -83,8 +83,8 @@ node_groups = [
     name                     = "app-1"
     ami_type                 = "AL2023_x86_64_STANDARD"
     instance_type            = "t3.medium"
-    desired_size             = 8
-    min_size                 = 6
+    desired_size             = 6
+    min_size                 = 4
     max_size                 = 15
     block_device_mappings = {
       # "/dev/xvdb" = {
@@ -155,6 +155,7 @@ kiali_virtual_service_host = "kiali.state.api.cresplanex.org"
 ##############################################
 enable_prometheus            = true
 prometheus_version           = "65.2.0"
+prometheus_virtual_service_host = "prometheus.state.api.cresplanex.org"
 grafana_virtual_service_host = "grafana.state.api.cresplanex.org"
 grafana_version              = "8.5.4"
 ##############################################

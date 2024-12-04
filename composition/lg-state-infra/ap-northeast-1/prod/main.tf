@@ -155,6 +155,7 @@ module "eks" {
   ##############################################
   enable_prometheus            = var.enable_prometheus
   prometheus_version           = var.prometheus_version
+  prometheus_virtual_service_host = var.prometheus_virtual_service_host
   grafana_virtual_service_host = var.grafana_virtual_service_host
   grafana_version              = var.grafana_version
   cognito_user_pool_id         = module.cognito.cognito_user_pool_id

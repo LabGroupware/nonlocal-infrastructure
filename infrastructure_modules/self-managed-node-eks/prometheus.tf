@@ -51,14 +51,14 @@ spec:
         prefix: /
     route:
     - destination:
-        host: grafana.${local.metrics_namespace}.svc.cluster.local
+        host: prometheus-kube-prometheus-prometheus.${local.metrics_namespace}.svc.cluster.local
         port:
-          number: 80
+          number: 9090
 YAML
 
   depends_on = [
     module.eks,
-    helm_release.grafana,
+    helm_release.prometheus,
     helm_release.istio_base,
     helm_release.istiod
   ]

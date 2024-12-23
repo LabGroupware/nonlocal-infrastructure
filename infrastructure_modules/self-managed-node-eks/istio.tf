@@ -420,8 +420,6 @@ resource "helm_release" "istiod" {
     value = 75
   }
 
-
-
   depends_on = [
     module.eks,
     helm_release.istio_base
@@ -491,6 +489,26 @@ resource "helm_release" "istio_ingress" {
   }
 
   set {
+    name  = "resources.requests.cpu"
+    value = "1500m"
+  }
+
+  set {
+    name  = "resources.requests.memory"
+    value = "2Gi"
+  }
+
+  set {
+    name  = "resources.limits.cpu"
+    value = "1500m"
+  }
+
+  set {
+    name  = "resources.limits.memory"
+    value = "2Gi"
+  }
+
+  set {
     name  = "service.ports[0].name"
     value = "status-port"
   }
@@ -514,7 +532,6 @@ resource "helm_release" "istio_ingress" {
     name  = "service.ports[0].protocol"
     value = "TCP"
   }
-
 
   # set {
   #   name  = "service.ports[1].name"
@@ -540,7 +557,6 @@ resource "helm_release" "istio_ingress" {
   #   name  = "service.ports[1].protocol"
   #   value = "TCP"
   # }
-
 
   set {
     name  = "service.ports[1].name"
@@ -598,223 +614,223 @@ YAML
 ##################################################
 # Cognito
 ##################################################
-resource "aws_cognito_user_pool_client" "admin_user_pool_kiali" {
-  name         = "kiali-client"
-  user_pool_id = var.cognito_user_pool_id
-  explicit_auth_flows = [
-    "ALLOW_REFRESH_TOKEN_AUTH",
-    "ALLOW_USER_PASSWORD_AUTH",
-    "ALLOW_ADMIN_USER_PASSWORD_AUTH",
-    "ALLOW_USER_SRP_AUTH",
-  ]
-  generate_secret                      = true
-  allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_flows                  = ["code"]
-  allowed_oauth_scopes                 = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
-  supported_identity_providers         = ["COGNITO"]
-  callback_urls = [
-    "https://${var.kiali_virtual_service_host}/kiali",
-  ]
-}
+# resource "aws_cognito_user_pool_client" "admin_user_pool_kiali" {
+#   name         = "kiali-client"
+#   user_pool_id = var.cognito_user_pool_id
+#   explicit_auth_flows = [
+#     "ALLOW_REFRESH_TOKEN_AUTH",
+#     "ALLOW_USER_PASSWORD_AUTH",
+#     "ALLOW_ADMIN_USER_PASSWORD_AUTH",
+#     "ALLOW_USER_SRP_AUTH",
+#   ]
+#   generate_secret                      = true
+#   allowed_oauth_flows_user_pool_client = true
+#   allowed_oauth_flows                  = ["code"]
+#   allowed_oauth_scopes                 = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
+#   supported_identity_providers         = ["COGNITO"]
+#   callback_urls = [
+#     "https://${var.kiali_virtual_service_host}/kiali",
+#   ]
+# }
 
-##############################################
-# Kiali
-##############################################
+# ##############################################
+# # Kiali
+# ##############################################
 
-resource "helm_release" "kiali_server" {
-  name             = "kiali-server"
-  chart            = "kiali-server"
-  repository       = local.kiali_repository
-  namespace        = local.istio_namespace
-  create_namespace = true
+# resource "helm_release" "kiali_server" {
+#   name             = "kiali-server"
+#   chart            = "kiali-server"
+#   repository       = local.kiali_repository
+#   namespace        = local.istio_namespace
+#   create_namespace = true
 
-  version = var.kiail_version
+#   version = var.kiail_version
 
-  set {
-    name  = "server.web_fqdn"
-    value = var.kiali_virtual_service_host
-  }
+#   set {
+#     name  = "server.web_fqdn"
+#     value = var.kiali_virtual_service_host
+#   }
 
-  # set {
-  #   name  = "auth.strategy"
-  #   value = "anonymous"
-  # }
+#   # set {
+#   #   name  = "auth.strategy"
+#   #   value = "anonymous"
+#   # }
 
-  set {
-    name  = "auth.strategy"
-    value = "openid"
-  }
+#   set {
+#     name  = "auth.strategy"
+#     value = "openid"
+#   }
 
-  set {
-    name  = "auth.openid.client_id"
-    value = aws_cognito_user_pool_client.admin_user_pool_kiali.id
-  }
+#   set {
+#     name  = "auth.openid.client_id"
+#     value = aws_cognito_user_pool_client.admin_user_pool_kiali.id
+#   }
 
-  set {
-    name  = "auth.openid.client_secret"
-    value = aws_cognito_user_pool_client.admin_user_pool_kiali.client_secret
-  }
+#   set {
+#     name  = "auth.openid.client_secret"
+#     value = aws_cognito_user_pool_client.admin_user_pool_kiali.client_secret
+#   }
 
-  set {
-    name  = "auth.openid.issuer_uri"
-    value = "https://${var.cognito_endpoint}"
-  }
+#   set {
+#     name  = "auth.openid.issuer_uri"
+#     value = "https://${var.cognito_endpoint}"
+#   }
 
-  set {
-    name  = "auth.openid.scopes[0]"
-    value = "openid"
-  }
+#   set {
+#     name  = "auth.openid.scopes[0]"
+#     value = "openid"
+#   }
 
-  set {
-    name  = "auth.openid.scopes[1]"
-    value = "email"
-  }
+#   set {
+#     name  = "auth.openid.scopes[1]"
+#     value = "email"
+#   }
 
-  set {
-    name  = "auth.openid.scopes[2]"
-    value = "profile"
-  }
+#   set {
+#     name  = "auth.openid.scopes[2]"
+#     value = "profile"
+#   }
 
-  set {
-    name  = "auth.openid.scopes[3]"
-    value = "aws.cognito.signin.user.admin"
-  }
+#   set {
+#     name  = "auth.openid.scopes[3]"
+#     value = "aws.cognito.signin.user.admin"
+#   }
 
-  # RBACありの挙動が異常なので無効化
-  # TODO: 修正
-  set {
-    name  = "auth.openid.disable_rbac"
-    value = "true"
-  }
+#   # RBACありの挙動が異常なので無効化
+#   # TODO: 修正
+#   set {
+#     name  = "auth.openid.disable_rbac"
+#     value = "true"
+#   }
 
-  # ログインユーザーは閲覧のみ
-  set {
-    name  = "deployment.view_only_mode"
-    value = "true"
-  }
+#   # ログインユーザーは閲覧のみ
+#   set {
+#     name  = "deployment.view_only_mode"
+#     value = "true"
+#   }
 
-  set {
-    name  = "auth.openid.username_claim"
-    value = "email"
-  }
+#   set {
+#     name  = "auth.openid.username_claim"
+#     value = "email"
+#   }
 
-  set {
-    name  = "external_services.tracing.enabled"
-    value = true
-  }
+#   set {
+#     name  = "external_services.tracing.enabled"
+#     value = true
+#   }
 
-  set {
-    name  = "external_services.tracing.use_grpc"
-    value = false
-  }
+#   set {
+#     name  = "external_services.tracing.use_grpc"
+#     value = false
+#   }
 
-  set {
-    name  = "external_services.tracing.in_cluster_url"
-    value = "http://jaeger-query.${local.tracing_namespace}.svc.cluster.local:80"
-  }
+#   set {
+#     name  = "external_services.tracing.in_cluster_url"
+#     value = "http://jaeger-query.${local.tracing_namespace}.svc.cluster.local:80"
+#   }
 
-  set {
-    name  = "external_services.prometheus.url"
-    value = "http://prometheus-kube-prometheus-prometheus.${local.metrics_namespace}.svc.cluster.local:9090"
-  }
+#   set {
+#     name  = "external_services.prometheus.url"
+#     value = "http://prometheus-kube-prometheus-prometheus.${local.metrics_namespace}.svc.cluster.local:9090"
+#   }
 
-  set {
-    name  = "external_services.grafana.enabled"
-    value = true
-  }
+#   set {
+#     name  = "external_services.grafana.enabled"
+#     value = true
+#   }
 
-  set {
-    name  = "external_services.grafana.url"
-    value = "http://grafana.${local.metrics_namespace}.svc.cluster.local:80"
-  }
+#   set {
+#     name  = "external_services.grafana.url"
+#     value = "http://grafana.${local.metrics_namespace}.svc.cluster.local:80"
+#   }
 
-  set {
-    name  = "external_services.grafana.in_cluster_url"
-    value = "http://grafana.${local.metrics_namespace}.svc.cluster.local:80"
-  }
+#   set {
+#     name  = "external_services.grafana.in_cluster_url"
+#     value = "http://grafana.${local.metrics_namespace}.svc.cluster.local:80"
+#   }
 
-  # level=info msg="Failed to authenticate request" client=auth.client.api-key error="[api-key.invalid] API key is invalid"
-  # set {
-  #   name  = "external_services.grafana.auth.type"
-  #   value = "basic"
-  # }
+#   # level=info msg="Failed to authenticate request" client=auth.client.api-key error="[api-key.invalid] API key is invalid"
+#   # set {
+#   #   name  = "external_services.grafana.auth.type"
+#   #   value = "basic"
+#   # }
 
-  # set {
-  #   name  = "external_services.grafana.auth.username"
-  #   value = "admin"
-  # }
+#   # set {
+#   #   name  = "external_services.grafana.auth.username"
+#   #   value = "admin"
+#   # }
 
-  # set {
-  #   name  = "external_services.grafana.auth.password"
-  #   value = "YOUR_SECURE_PASSWORD"
-  # }
+#   # set {
+#   #   name  = "external_services.grafana.auth.password"
+#   #   value = "YOUR_SECURE_PASSWORD"
+#   # }
 
-  # set {
-  #   name  = "external_services.grafana.auth.type"
-  #   value = "bearer"
-  # }
+#   # set {
+#   #   name  = "external_services.grafana.auth.type"
+#   #   value = "bearer"
+#   # }
 
-  # set {
-  #   name  = "external_services.grafana.auth.token"
-  #   value = ""
-  # }
+#   # set {
+#   #   name  = "external_services.grafana.auth.token"
+#   #   value = ""
+#   # }
 
-  # set {
-  #   name  = "external_services.grafana.auth.use_kiali_token"
-  #   value = true
-  # }
+#   # set {
+#   #   name  = "external_services.grafana.auth.use_kiali_token"
+#   #   value = true
+#   # }
 
-  set {
-    name  = "external_services.grafana.dashboards[0].name"
-    value = "kubernetes-cluster-monitoring"
-  }
+#   set {
+#     name  = "external_services.grafana.dashboards[0].name"
+#     value = "kubernetes-cluster-monitoring"
+#   }
 
-  set {
-    name  = "external_services.grafana.dashboards[1].name"
-    value = "node-exporter-full"
-  }
+#   set {
+#     name  = "external_services.grafana.dashboards[1].name"
+#     value = "node-exporter-full"
+#   }
 
-  set {
-    name  = "external_services.grafana.dashboards[2].name"
-    value = "prometheus-overview"
-  }
+#   set {
+#     name  = "external_services.grafana.dashboards[2].name"
+#     value = "prometheus-overview"
+#   }
 
-  set {
-    name  = "external_services.grafana.dashboards[3].name"
-    value = "kubernetes-pod"
-  }
+#   set {
+#     name  = "external_services.grafana.dashboards[3].name"
+#     value = "kubernetes-pod"
+#   }
 
-  set {
-    name  = "external_services.grafana.dashboards[4].name"
-    value = "node-exporter"
-  }
+#   set {
+#     name  = "external_services.grafana.dashboards[4].name"
+#     value = "node-exporter"
+#   }
 
-  set {
-    name  = "external_services.grafana.dashboards[5].name"
-    value = "cluster-monitoring-for-kubernetes"
-  }
+#   set {
+#     name  = "external_services.grafana.dashboards[5].name"
+#     value = "cluster-monitoring-for-kubernetes"
+#   }
 
-  set {
-    name  = "external_services.grafana.dashboards[6].name"
-    value = "k8s-cluster-summary"
-  }
+#   set {
+#     name  = "external_services.grafana.dashboards[6].name"
+#     value = "k8s-cluster-summary"
+#   }
 
-  set {
-    name  = "external_services.grafana.dashboards[7].name"
-    value = "kubernetes-cluster"
-  }
+#   set {
+#     name  = "external_services.grafana.dashboards[7].name"
+#     value = "kubernetes-cluster"
+#   }
 
-  values = [
-    "${file("${var.helm_dir}/kiali/values.yml")}"
-  ]
+#   values = [
+#     "${file("${var.helm_dir}/kiali/values.yml")}"
+#   ]
 
 
-  depends_on = [
-    module.eks,
-    helm_release.istio_base,
-    helm_release.istiod,
-  ]
-}
+#   depends_on = [
+#     module.eks,
+#     helm_release.istio_base,
+#     helm_release.istiod,
+#   ]
+# }
 
 # Auth RBAC
 # resource "kubernetes_cluster_role_binding_v1" "admin_kiali_binding" {
@@ -868,33 +884,33 @@ YAML
   ]
 }
 
-resource "kubectl_manifest" "kiali_virtual_service" {
-  yaml_body = <<YAML
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: kiali
-  namespace: ${local.istio_namespace}
-spec:
-  hosts:
-    - "${var.kiali_virtual_service_host}"
-  gateways:
-    - public-gateway
-  http:
-    - match:
-      - uri:
-          prefix: /
-      route:
-      - destination:
-          host: kiali.${local.istio_namespace}.svc.cluster.local
-          port:
-            number: 20001
-YAML
+# resource "kubectl_manifest" "kiali_virtual_service" {
+#   yaml_body = <<YAML
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: kiali
+#   namespace: ${local.istio_namespace}
+# spec:
+#   hosts:
+#     - "${var.kiali_virtual_service_host}"
+#   gateways:
+#     - public-gateway
+#   http:
+#     - match:
+#       - uri:
+#           prefix: /
+#       route:
+#       - destination:
+#           host: kiali.${local.istio_namespace}.svc.cluster.local
+#           port:
+#             number: 20001
+# YAML
 
-  depends_on = [
-    module.eks,
-    helm_release.kiali_server,
-    helm_release.istio_base,
-    helm_release.istiod
-  ]
-}
+#   depends_on = [
+#     module.eks,
+#     helm_release.kiali_server,
+#     helm_release.istio_base,
+#     helm_release.istiod
+#   ]
+# }

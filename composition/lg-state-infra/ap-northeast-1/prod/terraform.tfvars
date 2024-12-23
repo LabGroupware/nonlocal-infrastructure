@@ -85,7 +85,7 @@ node_groups = [
     instance_type            = "t3.medium"
     desired_size             = 6
     min_size                 = 4
-    max_size                 = 18
+    max_size                 = 24
     block_device_mappings = {
       # "/dev/xvdb" = {
       #   device_name = "/dev/xvdb"
@@ -146,7 +146,7 @@ cluster_private_zone    = "eks.local"
 # Istio
 ##############################################
 istio_version              = "1.23.2"
-istio_ingress_min_pods     = 1
+istio_ingress_min_pods     = 2
 istio_ingress_max_pods     = 5
 kiail_version              = "1.89.7"
 kiali_virtual_service_host = "kiali.state.api.cresplanex.org"

@@ -16,11 +16,11 @@ prometheus:
           resources:
             requests:
               storage: 50Gi
-    scrapeInterval: "10s" # 間隔は適度に変える
+    scrapeInterval: "5s" # 間隔は適度に変える
     resources:
       requests:
-        memory: "1Gi"
-        cpu: "200m"
+        memory: "1.5Gi"
+        cpu: "400m"
       limits:
         memory: "2Gi"
         cpu: "500m"

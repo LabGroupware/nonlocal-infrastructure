@@ -62,6 +62,8 @@ cluster_enabled_log_types              = ["audit", "api", "authenticator"]
 cloudwatch_log_group_retention_in_days = 90
 create_admin_access_entry              = true
 cluster_admin_role                     = "ClusterAdmin"
+lb_client_keep_alive                   = 3600
+lb_idle_timeout                        = 600
 additional_accesss_entries = {
   # "User1" = {
   #   principal_arn = "arn:aws:iam::123456789012:role/User1"
@@ -78,28 +80,113 @@ additional_accesss_entries = {
   # }
 }
 node_groups = [
+  # {
+  #   create_autoscaling_group = true
+  #   name                     = "app-1"
+  #   ami_type                 = "AL2023_x86_64_STANDARD"
+  #   instance_type            = "t3.medium"
+  #   # mixed_instances_policy {
+  #   #   instances_distribution {
+  #   #     on_demand_allocation_strategy            = "prioritized" # オンデマンドインスタンスの選択戦略
+  #   #     on_demand_base_capacity                  = 0             # 基本容量はすべてスポットに割り当て
+  #   #     on_demand_percentage_above_base_capacity = 0             # 必要な場合もスポット優先
+  #   #     spot_allocation_strategy                 = "lowest-price" # 最も安いスポットを選択
+  #   #     spot_instance_pools                      = 2             # 最大2つのインスタンスタイプでスポットを選択
+  #   #     spot_max_price                           = "0.1"         # スポットインスタンスの最大価格
+  #   #   }
+
+  #   #   override {
+  #   #     instance_type = "t3.medium" # 優先するインスタンスタイプ
+  #   #   }
+  #   # }
+  #   desired_size             = 6
+  #   min_size                 = 4
+  #   max_size                 = 20
+  #   block_device_mappings = {
+  #     # "/dev/xvdb" = {
+  #     #   device_name = "/dev/xvdb"
+  #     #   ebs = {
+  #     #     volume_size           = 20
+  #     #     volume_type           = "gp3"
+  #     #     delete_on_termination = true
+  #     #     encrypted             = true
+  #     #   }
+  #     # }
+  #   }
+  #   node_labels = "for=app"
+  #   # node_taints = "for=app:NoSchedule"
+  #   node_taints = ""
+  # },
   {
+    # ンスタンスをスポットで確保
     create_autoscaling_group = true
-    name                     = "app-1"
+    name                     = "domain-group"
     ami_type                 = "AL2023_x86_64_STANDARD"
+    use_mixed_instances_policy = true
     instance_type            = "t3.medium"
-    desired_size             = 6
-    min_size                 = 4
-    max_size                 = 24
-    block_device_mappings = {
-      # "/dev/xvdb" = {
-      #   device_name = "/dev/xvdb"
-      #   ebs = {
-      #     volume_size           = 20
-      #     volume_type           = "gp3"
-      #     delete_on_termination = true
-      #     encrypted             = true
-      #   }
-      # }
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "lowest-price"
+        spot_instance_pools                      = 3
+        spot_max_price                           = "0.04" # スポットインスタンスの最大価格
+      }
     }
-    node_labels = "for=app"
-    # node_taints = "for=app:NoSchedule"
-    node_taints = ""
+    desired_size             = 10
+    min_size                 = 6
+    max_size                 = 25
+    block_device_mappings    = {}
+    node_labels              = "for=app"
+  },
+  {
+    # ドメインサービスDB用インスタンスをスポットで確保
+    create_autoscaling_group = true
+    name                     = "db-group"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "lowest-price"
+        spot_instance_pools                      = 3
+        spot_max_price                           = "0.14" 
+      }
+    }
+    desired_size             = 6
+    min_size                 = 6
+    max_size                 = 6
+    block_device_mappings    = {}
+    node_labels              = "for=db"
+    node_taints              = "for=domain-db:NoSchedule"
+  },
+  {
+    # WebGateway用インスタンスをスポットで確保
+    create_autoscaling_group = true
+    name                     = "web-gateway"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "lowest-price"
+        spot_instance_pools                      = 3
+        spot_max_price                           = "0.17" 
+      }
+    }
+    desired_size             = 2
+    min_size                 = 2
+    max_size                 = 2
+    block_device_mappings    = {}
+    node_labels              = "for=web-gateway"
+    node_taints              = "for=web-gateway:NoSchedule"
   }
 ]
 ########################################

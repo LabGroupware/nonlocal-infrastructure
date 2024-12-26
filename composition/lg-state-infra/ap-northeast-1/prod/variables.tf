@@ -208,6 +208,16 @@ variable "cloudwatch_log_group_retention_in_days" {
   type        = number
 }
 
+variable "lb_client_keep_alive" {
+  type        = number
+  description = "The time in seconds that the connection is allowed to be idle before it is closed by the load balancer."
+}
+
+variable "lb_idle_timeout" {
+  type        = number
+  description = "The time in seconds that the connection is allowed to be idle before it is closed by the load balancer."
+}
+
 variable "create_admin_access_entry" {
   description = "Create admin access entry"
   type        = bool

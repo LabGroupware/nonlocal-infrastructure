@@ -133,6 +133,9 @@ module "eks" {
   lb_ingress_internal  = false
   lb_security_group_id = module.vpc.public_security_group_id
   lb_subnet_ids        = module.vpc.public_subnets
+  lb_client_keep_alive = var.lb_client_keep_alive
+  lb_idle_timeout      = var.lb_idle_timeout
+
   proxy_protocol_v2    = false
   enable_vpc_link      = false
   #########################

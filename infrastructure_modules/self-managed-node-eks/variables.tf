@@ -456,6 +456,16 @@ variable "lb_subnet_ids" {
   description = "The subnet IDs to use for the load balancer(Public Subnets)"
 }
 
+variable "lb_client_keep_alive" {
+  type        = number
+  description = "The time in seconds that the connection is allowed to be idle before it is closed by the load balancer."
+}
+
+variable "lb_idle_timeout" {
+  type        = number
+  description = "The time in seconds that the connection is allowed to be idle before it is closed by the load balancer."
+}
+
 variable "proxy_protocol_v2" {
   type        = bool
   description = "Enables or disables Proxy Protocol v2 on the Network Load Balancer, used for preserving client IP addresses and other connection information."

@@ -81,6 +81,9 @@ resource "aws_lb" "ingress" {
   internal = var.lb_ingress_internal
   # load_balancer_type = "network"
 
+  client_keep_alive = var.lb_client_keep_alive
+  idle_timeout      = var.lb_idle_timeout
+
   subnets = var.lb_subnet_ids
   security_groups = [
     var.lb_security_group_id
@@ -412,7 +415,7 @@ resource "helm_release" "istiod" {
 
   set {
     name  = "resources.requests.memory"
-    value = "2Gi"
+    value = "1Gi"
   }
 
   set {

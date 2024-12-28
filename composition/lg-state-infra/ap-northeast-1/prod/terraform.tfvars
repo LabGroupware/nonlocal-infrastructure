@@ -80,47 +80,240 @@ additional_accesss_entries = {
   # }
 }
 node_groups = [
-  # {
-  #   create_autoscaling_group = true
-  #   name                     = "app-1"
-  #   ami_type                 = "AL2023_x86_64_STANDARD"
-  #   instance_type            = "t3.medium"
-  #   # mixed_instances_policy {
-  #   #   instances_distribution {
-  #   #     on_demand_allocation_strategy            = "prioritized" # オンデマンドインスタンスの選択戦略
-  #   #     on_demand_base_capacity                  = 0             # 基本容量はすべてスポットに割り当て
-  #   #     on_demand_percentage_above_base_capacity = 0             # 必要な場合もスポット優先
-  #   #     spot_allocation_strategy                 = "lowest-price" # 最も安いスポットを選択
-  #   #     spot_instance_pools                      = 2             # 最大2つのインスタンスタイプでスポットを選択
-  #   #     spot_max_price                           = "0.1"         # スポットインスタンスの最大価格
-  #   #   }
-
-  #   #   override {
-  #   #     instance_type = "t3.medium" # 優先するインスタンスタイプ
-  #   #   }
-  #   # }
-  #   desired_size             = 6
-  #   min_size                 = 4
-  #   max_size                 = 20
-  #   block_device_mappings = {
-  #     # "/dev/xvdb" = {
-  #     #   device_name = "/dev/xvdb"
-  #     #   ebs = {
-  #     #     volume_size           = 20
-  #     #     volume_type           = "gp3"
-  #     #     delete_on_termination = true
-  #     #     encrypted             = true
-  #     #   }
-  #     # }
-  #   }
-  #   node_labels = "for=app"
-  #   # node_taints = "for=app:NoSchedule"
-  #   node_taints = ""
-  # },
   {
-    # ンスタンスをスポットで確保
+    # Domain Common Node Group
     create_autoscaling_group = true
-    name                     = "domain-group"
+    name                     = "domain-common"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 2
+    min_size                 = 2
+    max_size                 = 2
+    block_device_mappings    = {}
+    node_labels              = "for=domain-common"
+    node_taints              = "for=domain-common:NoSchedule"
+  },
+  {
+    # User Profile Node Group
+    create_autoscaling_group = true
+    name                     = "user-profile"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=user-profile"
+    node_taints              = "for=user-profile:NoSchedule"
+  },
+  {
+    # User Preference Node Group
+    create_autoscaling_group = true
+    name                     = "user-preference"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=user-preference"
+    node_taints              = "for=user-preference:NoSchedule"
+  },
+  {
+    # Organization Node Group
+    create_autoscaling_group = true
+    name                     = "organization"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=organization"
+    node_taints              = "for=organization:NoSchedule"
+  },
+  {
+    # Team Node Group
+    create_autoscaling_group = true
+    name                     = "team"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=team"
+    node_taints              = "for=team:NoSchedule"
+  },
+  {
+    # Storage Node Group
+    create_autoscaling_group = true
+    name                     = "storage"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=storage"
+    node_taints              = "for=storage:NoSchedule"
+  },
+  {
+    # Plan Node Group
+    create_autoscaling_group = true
+    name                     = "plan"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=plan"
+    node_taints              = "for=plan:NoSchedule"
+  },
+  {
+    # Auth Node Group
+    create_autoscaling_group = true
+    name                     = "auth"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "t4g.medium"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=auth"
+    node_taints              = "for=auth:NoSchedule"
+  },
+  {
+    # Web Gateway Node Group
+    create_autoscaling_group = true
+    name                     = "web-gateway"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "c7g.2xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=web-gateway"
+    node_taints              = "for=web-gateway:NoSchedule"
+  },
+  {
+    # Tracking Node Group
+    create_autoscaling_group = true
+    name                     = "tracking"
+    ami_type                 = "AL2023_ARM_64_STANDARD"
+    use_mixed_instances_policy = true
+    instance_type            = "t4g.2xlarge"
+    mixed_instances_policy = {
+      instances_distribution = {
+        on_demand_allocation_strategy            = "prioritized"
+        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_percentage_above_base_capacity = 0
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
+      }
+    }
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
+    block_device_mappings    = {}
+    node_labels              = "for=tracking"
+    node_taints              = "for=tracking:NoSchedule"
+  },
+  {
+    # Connect Node Group
+    create_autoscaling_group = true
+    name                     = "connect"
     ami_type                 = "AL2023_x86_64_STANDARD"
     use_mixed_instances_policy = true
     instance_type            = "t3.medium"
@@ -129,64 +322,38 @@ node_groups = [
         on_demand_allocation_strategy            = "prioritized"
         on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
         on_demand_percentage_above_base_capacity = 0
-        spot_allocation_strategy                 = "lowest-price"
-        spot_instance_pools                      = 3
-        spot_max_price                           = "0.04" # スポットインスタンスの最大価格
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
       }
     }
-    desired_size             = 10
-    min_size                 = 6
-    max_size                 = 25
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 3
     block_device_mappings    = {}
-    node_labels              = "for=app"
+    node_labels              = "for=connect"
+    node_taints              = "for=connect:NoSchedule"
   },
   {
-    # ドメインサービスDB用インスタンスをスポットで確保
+    # Other Group
     create_autoscaling_group = true
-    name                     = "db-group"
+    name                     = "other"
     ami_type                 = "AL2023_ARM_64_STANDARD"
     use_mixed_instances_policy = true
-    instance_type            = "c7g.xlarge"
+    instance_type            = "t4g.2xlarge"
     mixed_instances_policy = {
       instances_distribution = {
         on_demand_allocation_strategy            = "prioritized"
-        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
+        on_demand_base_capacity                  = 0
         on_demand_percentage_above_base_capacity = 0
-        spot_allocation_strategy                 = "lowest-price"
-        spot_instance_pools                      = 3
-        spot_max_price                           = "0.14" 
+        spot_allocation_strategy                 = "capacity-optimized"
+        spot_instance_pools                      = 0
       }
     }
-    desired_size             = 6
-    min_size                 = 6
-    max_size                 = 6
+    desired_size             = 1
+    min_size                 = 1
+    max_size                 = 1
     block_device_mappings    = {}
-    node_labels              = "for=db"
-    node_taints              = "for=domain-db:NoSchedule"
-  },
-  {
-    # WebGateway用インスタンスをスポットで確保
-    create_autoscaling_group = true
-    name                     = "web-gateway"
-    ami_type                 = "AL2023_ARM_64_STANDARD"
-    use_mixed_instances_policy = true
-    instance_type            = "c7g.xlarge"
-    mixed_instances_policy = {
-      instances_distribution = {
-        on_demand_allocation_strategy            = "prioritized"
-        on_demand_base_capacity                  = 0 # 最低0台はオンデマンドで確保
-        on_demand_percentage_above_base_capacity = 0
-        spot_allocation_strategy                 = "lowest-price"
-        spot_instance_pools                      = 3
-        spot_max_price                           = "0.17" 
-      }
-    }
-    desired_size             = 2
-    min_size                 = 2
-    max_size                 = 2
-    block_device_mappings    = {}
-    node_labels              = "for=web-gateway"
-    node_taints              = "for=web-gateway:NoSchedule"
+    node_labels              = "for=other"
   }
 ]
 ########################################

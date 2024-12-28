@@ -19,8 +19,8 @@ prometheus:
     scrapeInterval: "5s" # 間隔は適度に変える
     resources:
       requests:
-        memory: "1.5Gi"
-        cpu: "400m"
+        memory: "2Gi"
+        cpu: "500m"
       limits:
         memory: "2Gi"
         cpu: "500m"

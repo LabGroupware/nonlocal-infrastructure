@@ -395,18 +395,18 @@ resource "helm_release" "istiod" {
 
   set {
     name  = "autoscaleEnabled"
-    value = "true"
+    value = "false"
   }
 
-  set {
-    name  = "autoscaleMin"
-    value = 1
-  }
+  # set {
+  #   name  = "autoscaleMin"
+  #   value = 1
+  # }
 
-  set {
-    name  = "autoscaleMax"
-    value = 5
-  }
+  # set {
+  #   name  = "autoscaleMax"
+  #   value = 5
+  # }
 
   set {
     name  = "resources.requests.cpu"
@@ -415,6 +415,16 @@ resource "helm_release" "istiod" {
 
   set {
     name  = "resources.requests.memory"
+    value = "1Gi"
+  }
+
+  set {
+    name  = "resources.limits.cpu"
+    value = "500m"
+  }
+
+  set {
+    name  = "resources.limits.memory"
     value = "1Gi"
   }
 
@@ -493,7 +503,7 @@ resource "helm_release" "istio_ingress" {
 
   set {
     name  = "resources.requests.cpu"
-    value = "1500m"
+    value = "1.5"
   }
 
   set {
@@ -503,7 +513,7 @@ resource "helm_release" "istio_ingress" {
 
   set {
     name  = "resources.limits.cpu"
-    value = "1500m"
+    value = "1.5"
   }
 
   set {

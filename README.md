@@ -223,7 +223,7 @@ aws eks update-kubeconfig --region ap-northeast-1 --name LGStateApNortheast1Prod
 #### State研究の終了時
 terraform destroyの実行(30分くらいかかる)
 ``` sh
-terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod destroy
+terraform -chdir=composition/lg-state-infra/ap-northeast-1/prod destroy --auto-approve
 ```
 EBSボリュームの削除
 

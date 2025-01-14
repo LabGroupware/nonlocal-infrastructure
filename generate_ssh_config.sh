@@ -1,11 +1,35 @@
 #!/bin/bash
 
+REGION=$1
+
+if [ -z "$REGION" ]; then
+  echo "Usage: $0 <region>"
+  exit 1
+fi
+
+case "$REGION" in
+  "ap-northeast-1")
+    SHORT_REGION="apne1"
+    ;;
+  "us-east-1")
+    SHORT_REGION="use1"
+    ;;
+  "eu-west-1")
+    SHORT_REGION="euw1"
+    ;;
+  # 必要に応じて他のマッピングを追加
+  *)
+    echo "Unknown region: $REGION"
+    exit 1
+    ;;
+esac
+
 BASTION_IP=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=bastion-host-apne1-prod-lg-state-infra" \
+    --filters "Name=tag:Name,Values=bastion-host-${SHORT_REGION}-prod-lg-state-infra" \
     --query "Reservations[*].Instances[*].PublicIpAddress" \
     --output text)
 NODE_DOMAIN=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=instance-lg-state-infra-apne1-prod-app-1" \
+    --filters "Name=tag:Name,Values=instance-lg-state-infra-${SHORT_REGION}-prod-app-1" \
     --query "Reservations[*].Instances[*].PrivateDnsName | [0]" \
     --output text)
 BASE_DIR="$(pwd)"
@@ -15,8 +39,8 @@ SSH_CONFIG_DIR="${BASE_DIR}/.ssh"
 SSH_CONFIG_FILE="${SSH_CONFIG_DIR}/config"
 
 # 鍵ファイルのパス
-BASTION_KEY="${BASE_DIR}/composition/lg-state-infra/ap-northeast-1/prod/.keys/bastion.id_rsa"
-NODE_KEY="${BASE_DIR}/composition/lg-state-infra/ap-northeast-1/prod/.keys/eks-node.id_rsa"
+BASTION_KEY="${BASE_DIR}/composition/lg-state-infra/${REGION}/prod/.keys/bastion.id_rsa"
+NODE_KEY="${BASE_DIR}/composition/lg-state-infra/${REGION}/prod/.keys/eks-node.id_rsa"
 
 # .sshディレクトリが存在しない場合は作成
 if [ ! -d "${SSH_CONFIG_DIR}" ]; then

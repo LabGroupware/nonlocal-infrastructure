@@ -5,10 +5,10 @@
 # Computed variables
 locals {
   region_tag = {
-    "us-east-1"      = "ue1"
-    "us-west-1"      = "uw1"
-    "eu-west-1"      = "ew1"
-    "eu-central-1"   = "ec1"
+    "us-east-1"      = "use1"
+    "us-west-1"      = "usw1"
+    "eu-west-1"      = "euw1"
+    "eu-central-1"   = "euc1"
     "ap-northeast-1" = "apne1"
   }
 

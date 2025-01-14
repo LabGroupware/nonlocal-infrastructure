@@ -128,7 +128,7 @@ locals {
 # EKS worker SG not created yet
 # data "aws_security_group" "eks_worker_sg" {
 #   tags = {
-#     Name = "eks-ue1-prod-XXX-api-infra-eks_worker_sg"
+#     Name = "eks-use1-prod-XXX-api-infra-eks_worker_sg"
 #   }
 
 #   id = "sg-08fc14b9cb38d325c"

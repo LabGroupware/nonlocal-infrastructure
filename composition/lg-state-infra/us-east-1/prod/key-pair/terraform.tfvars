@@ -1,6 +1,6 @@
 env              = "prod"
 profile_name     = "terraform"
-region           = "ap-northeast-1"
+region           = "us-east-1"
 application_name = "lg-state-infra"
 
 need_bastion_key  = true
